@@ -1,0 +1,167 @@
+generated: '2026-07-31'
+method: searched
+source: openapi/unqork-customer-api-openapi.yml
+docs:
+  - https://docs.unqork.io/docs/api-authentication
+  - https://docs.unqork.io/docs/api-access-management
+  - https://docs.unqork.io/docs/api-authentication-bearer-token
+  - https://docs.unqork.io/docs/connect-to-the-unqork-api
+description: >-
+  The Unqork Customer API authenticates exclusively with OAuth 2.0 bearer tokens.
+  Two grants are supported — client credentials (the default and recommended
+  path) and the resource-owner password grant (off by default, enabled per
+  environment). There are no API keys and no basic-auth path to the resources
+  themselves; HTTP Basic is used only to present client credentials at the token
+  endpoint. Authorization is RBAC, not scopes.
+
+summary:
+  types: [oauth2]
+  oauth2_flows: [clientCredentials, password]
+  api_key_in: []
+  bearer_header: 'Authorization: Bearer {access_token}'
+  token_lifetime_seconds: 3600
+  scope_based: false
+  authorization_model: rbac
+  applied_globally: true
+
+schemes:
+  - name: OAuth2
+    type: oauth2
+    applied: >-
+      Document-level `security: [{OAuth2: []}]` — every one of the 93 operations
+      requires a bearer token.
+    flows:
+      - flow: clientCredentials
+        tokenUrl: https://{subdomain}.unqork.io/api/1.0/oauth2/access_token
+        spec_tokenUrl: https://xyzfinancial.unqork.io/api/1.0/oauth2/access_token
+        scopes: 1
+        scopes_note: single placeholder scope `none` (N/A) — not a real permission
+        rfc: RFC 6749 §1.3.4
+        recommended: true
+        credential_source: Administration → API Access Management
+        request: >-
+          curl -u '{clientId}:{clientSecret}' -X POST --basic
+          https://{subdomain}.unqork.io/api/1.0/oauth2/access_token
+          -d "grant_type=client_credentials"
+      - flow: password
+        tokenUrl: https://{subdomain}.unqork.io/api/1.0/oauth2/access_token
+        spec_tokenUrl: https://xyzfinancial.unqork.io/api/1.0/oauth2/access_token
+        scopes: 1
+        rfc: RFC 6749 §1.3.3
+        recommended: false
+        enabled_by_default: false
+        enablement: >-
+          Administration → Environment Administration → Unqork API →
+          "Enable OAuth2 Password Grant". Once enabled, ALL Unqork users in the
+          environment can exchange their platform username/password for an
+          access token.
+        caveat: >-
+          Removed in OAuth 2.1 and discouraged by RFC 9700 (OAuth 2.0 Security
+          Best Current Practice). Enabling it widens the token-issuing surface to
+          every human account in the environment.
+        request: >-
+          curl -X POST https://{subdomain}.unqork.io/api/1.0/oauth2/access_token
+          -d "grant_type=password&username={username}&password={password}"
+    description: >-
+      The Unqork API implements the OAuth 2.0 Client Credentials Grant and the
+      OAuth 2.0 Password Grant. Client credentials are created on the API Access
+      Management administration page. The token endpoint returns an access_token
+      which expires after one hour, after which a new one must be retrieved. The
+      token is presented on every request as an Authorization: Bearer header.
+    sources:
+      - openapi/unqork-customer-api-openapi.yml
+
+credential_surfaces:
+  - name: Express
+    purpose: End-user-facing API access (submissions, workflow execution) in Express View
+    role_requirement: At least one Express Role is required to create a credential
+    role_admin: https://docs.unqork.io/docs/express-role-administration
+    permissions: https://docs.unqork.io/docs/express-permissions
+    revocable: false
+  - name: Creator
+    purpose: Design-time API access (modules, applications, promotions, credentials)
+    role_requirement: At least one Creator Role is required to create a credential
+    role_admin: https://docs.unqork.io/docs/creator-role-administration
+    permissions: https://docs.unqork.io/docs/creator-permissions
+    revocable: true
+
+credential_lifecycle:
+  client_id_prefix: uq
+  client_id_example_shape: uq + 24 hex characters
+  secret_visibility: >-
+    The Client Secret is displayed exactly once, in the Client ID & Secret modal
+    at creation time, and is not retrievable afterwards. If lost, an administrator
+    must generate a new secret (the Client ID is retained).
+  expiration_days: {min: 1, max: 730, ui_default: 90}
+  statuses:
+    ACTIVE: Currently active and able to access the API
+    EXPIRES SOON: Set when 15% or less of the validity window remains (14 days on a 90-day credential)
+    EXPIRED: Past the expiration date; can no longer access the APIs
+    REVOKED: Administrator has removed API access (Creator credentials only)
+    LOCKED: >-
+      Temporarily disabled after up to five failed client-secret login attempts;
+      automatically reverts to ACTIVE after 30 minutes
+  managed_via_api:
+    list: credentialsGetAll
+    create: credentialsCreate
+    update: credentialsUpdate
+    revoke: credentialsRevoke
+    delete: credentialsDeleteById
+  delete_is_permanent: true
+
+additional_mechanisms:
+  - name: Referstring
+    operation: generateReferString
+    path: POST /referstring
+    description: Generates an encrypted referstring for authentication.
+    note: Mints authentication material — handle like a secret.
+  - name: mTLS with OAuth 2.0
+    direction: outbound
+    description: >-
+      Client mutual-TLS certificates can be paired with OAuth 2.0 for OUTBOUND
+      integrations from Unqork modules to external services. This is not an
+      inbound securityScheme on the Customer API.
+    docs: https://docs.unqork.io/docs/how-to-setup-an-mtls-certificate-with-oauth-20-authentication
+  - name: SAML SSO
+    scope: platform login, not the Customer API
+    description: >-
+      Unqork supports SAML single sign-on for platform and community access
+      (the Community Hub exposes an ssoType=saml proxy). The Customer API itself
+      is OAuth 2.0 only.
+  - name: PIV/CAC
+    scope: US Government customers
+    description: >-
+      PIV/CAC authentication is offered for US Government deployments as part of
+      Unqork's FedRAMP posture.
+    source: https://unqork.com/security-compliance/
+
+anonymous_access:
+  supported: true
+  context: webhook receivers only
+  note: >-
+    A module configured to receive external webhooks must grant anonymous-user
+    RBAC permissions, which makes its URL publicly callable with no
+    authentication and no signature verification. See asyncapi/unqork-webhooks.yml.
+
+discovery:
+  openid_configuration: false
+  oauth_authorization_server_metadata: false
+  note: >-
+    Neither /.well-known/openid-configuration nor
+    /.well-known/oauth-authorization-server (RFC 8414) is served on any Unqork
+    host — see well-known/unqork-well-known.yml. Token endpoint and grant support
+    are documented only in prose and in the OpenAPI securityScheme description.
+
+gaps:
+  - No RFC 8414 authorization-server metadata document.
+  - No OIDC / openIdConnect scheme.
+  - No refresh-token flow documented — a one-hour token must be re-minted from credentials.
+  - No scopes, so no way to request a read-only token.
+  - >-
+    No PKCE / authorization-code flow, so there is no delegated-user
+    authorization path for third-party applications.
+
+related:
+  scopes: scopes/unqork-scopes.yml
+  conventions: conventions/unqork-conventions.yml
+  lifecycle: lifecycle/unqork-lifecycle.yml

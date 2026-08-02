@@ -1,0 +1,110 @@
+generated: '2026-07-31'
+method: searched
+source: >-
+  https://docs.unqork.io/docs/bring-your-own-byo-component-sdk-software-development-kit,
+  https://docs.unqork.io/docs/bring-your-own-byo-understanding-runtime-engine-api,
+  https://docs.unqork.io/docs/plug-in-component,
+  https://docs.unqork.io/llms.txt
+description: >-
+  Unqork's component surface is unusual for this artifact type. The platform IS a
+  component library — a Creator builds applications by configuring hundreds of
+  first-party components in the Designer — and the "embeddable" story runs in the
+  opposite direction from most API providers: rather than Unqork shipping widgets
+  you embed in your app, Unqork lets YOU register your own Web Components into
+  the Unqork runtime through the BYO (Bring Your Own) Component SDK. This file
+  captures the extension surface that a developer actually programs against.
+
+families:
+  - name: BYO (Bring Your Own) Component SDK
+    kind: extension-sdk
+    standard: W3C Web Components (Custom Elements)
+    official: true
+    docs: https://docs.unqork.io/docs/bring-your-own-byo-component-sdk-software-development-kit
+    description: >-
+      Unqork's External Component V1 SDK. A Creator authors a valid Web Component
+      whose module default-exports a class extending HTMLElement, hosts the
+      bundle at a URL, and registers it in the Designer as a component of
+      `type: "byoc"`. Unqork renders it inside Express View.
+    contract:
+      entry_point: default export of the module
+      required_method: 'initialize(config, api)'
+      lifecycle: standard Custom Element callbacks (e.g. connectedCallback)
+      registration_shape:
+        key: component key in the module
+        type: byoc
+        name: component name
+        url: URL of the hosted component bundle
+        args: mapping of Unqork component keys into the component's inputs
+    design_principles:
+      - 'Minimal Surface Area: expose only essential interfaces to prevent unintended modifications'
+      - 'Encapsulation: protect internal state and logic from direct access'
+      - 'Extensibility: a structured way to introduce new components'
+      - 'Security & Stability: external plugins cannot compromise the core system'
+    audience_warning: >-
+      Unqork flags this as intended for configurators with a strong understanding
+      of the Unqork Designer Platform.
+  - name: BYO Runtime Engine API
+    kind: runtime-api
+    official: true
+    docs: https://docs.unqork.io/docs/bring-your-own-byo-understanding-runtime-engine-api
+    description: >-
+      The `api` object handed to a BYO component's initialize method — the
+      runtime contract a custom component uses to read and write module state.
+  - name: Plug-In component
+    kind: first-party integration component
+    official: true
+    docs: https://docs.unqork.io/docs/plug-in-component
+    description: >-
+      Connects modules to internal and external services for secure API calls.
+      The primary in-platform mechanism for consuming an API, used where another
+      platform would hand you an SDK.
+  - name: Map V2 component
+    kind: first-party UI component
+    official: true
+    docs: https://docs.unqork.io/docs/map-v2-component
+    description: >-
+      Interactive maps built on the Google Maps API — address search, satellite
+      view, geocoding.
+  - name: API Specification snippet
+    kind: configuration snippet
+    official: true
+    docs: https://docs.unqork.io/docs/api-specification-snippet
+    description: >-
+      A reusable snippet, based on the OpenAPI Specification description format,
+      used when building internal API modules. It is what drives Unqork's API
+      auto-documentation.
+  - name: Webhook API snippet
+    kind: configuration snippet
+    official: true
+    docs: https://docs.unqork.io/docs/webhook-api-snippet
+    description: Snippet for configuring a module to receive webhook callbacks.
+  - name: Paginated Submissions API snippet
+    kind: configuration snippet
+    official: true
+    docs: https://docs.unqork.io/docs/paginated-submissions-api-snippet
+    description: Snippet for paging through submissions.
+  - name: Extensions
+    kind: extension-framework
+    official: true
+    docs: https://docs.unqork.io/docs/introduction-to-extensions
+    description: >-
+      Custom functionality in the Module Builder for enhanced module
+      interactions and API connections.
+
+loader_libraries: []
+loader_note: >-
+  There is no Unqork JS loader library to include in a third-party page. BYO
+  components are loaded BY Unqork from a URL the Creator supplies; the
+  integration direction is inbound, not outbound.
+
+accessibility:
+  supported: true
+  docs: https://docs.unqork.io/docs/building-accessible-unqork-applications
+  artifacts:
+    - {name: Unqork's Accessibility Rulebook, url: 'https://docs.unqork.io/docs/unqorks-accessibility-rulebook'}
+    - {name: ARIA Accessibility Settings Reference, url: 'https://docs.unqork.io/docs/aria-accessible-rich-internet-applications-accessibility-settingsreference'}
+    - {name: Autocomplete Reference Guide, url: 'https://docs.unqork.io/docs/autocomplete-referenceguide'}
+
+related:
+  open_specification: https://github.com/unqork-external/runtime-specification
+  packages: packages/unqork-packages.yml

@@ -1,0 +1,126 @@
+generated: '2026-07-31'
+method: searched
+source: >-
+  https://docs.unqork.io/docs/unqork-release-notes,
+  https://docs.unqork.io/docs/2026-release-calendar,
+  https://status.unqork.com/, openapi/unqork-customer-api-openapi.yml
+description: >-
+  Unqork runs a time-based platform release cycle, promoted through a fixed
+  environment ladder (Staging → UAT → Production). The REST API itself is version
+  pinned in the URI path and has not moved, while the platform underneath it ships
+  a new GA every quarter.
+
+versioning:
+  api:
+    scheme: uri-path
+    current: '1.0'
+    path: /api/1.0
+    docs: https://developers.unqork.io/
+    note: >-
+      The Customer API path has been /api/1.0 across platform majors 7.x, 8.x and
+      9.0. Platform behaviour changes are therefore NOT signalled by the API
+      version — callers must track the platform release calendar instead.
+  platform:
+    scheme: semver-ish major.minor (+ patch)
+    current: '8.2'
+    next: '9.0'
+    docs: https://docs.unqork.io/docs/unqork-release-notes
+    note: >-
+      Unqork renamed what would have been 8.4 to 9.0 "to better match the
+      significant scale, capabilities, and value coming with the launch of
+      UnqorkAI", so the numbering is marketing-led rather than strictly semantic.
+  applications:
+    scheme: Application Versioning (per-customer, branch + version model)
+    docs: https://docs.unqork.io/docs/unqork-application-versioning
+    note: >-
+      Customers version their own applications inside the platform, with a
+      Branch & Version Management drawer, dependency tracking, default versions,
+      and Promotions between environments. This is a distinct versioning axis
+      from the platform and the API.
+
+release_cadence:
+  ga: quarterly (12-week cycle)
+  ga_since: '2026'
+  previous_model: 6-week cohort schedule (replaced beginning with the 8.0 release)
+  patch: Weekly, released Tuesday of every week, as needed for critical fixes
+  release_notes_lead_time: >-
+    Release notes are published one week before the release appears in Staging
+    environments.
+  environment_ladder: [Staging, UAT, Production]
+
+releases:
+  - version: '8.0'
+    staging: '2026-02-10'
+    uat: '2026-02-24'
+    production: '2026-03-10'
+  - version: '8.2'
+    staging: '2026-05-05'
+    uat: '2026-05-19'
+    production: '2026-06-09'
+    note: >-
+      Production date adjusted for Unqork's annual Create conference.
+  - version: '9.0'
+    staging: '2026-09-15'
+    uat: '2026-09-29'
+    production: '2026-10-13'
+    note: >-
+      Renamed from 8.4; the UnqorkAI release.
+
+deprecation:
+  policy_url: null
+  sunset_header: false
+  deprecation_header: false
+  documented: false
+  note: >-
+    No API deprecation or sunset policy is published, and no RFC 8594
+    Sunset/Deprecation header support is documented or present in the OpenAPI.
+    The spec declares zero `deprecated: true` operations. Individual features
+    have been sunset with dated notices in the docs (e.g. Transform Revisions
+    restore before the January 10, 2023 sunsetting), but there is no standing
+    contract for how long an API operation survives after being superseded.
+    No `Deprecation` pointer is wired in apis.yml as a result.
+
+deprecated_operations: []
+
+status_page:
+  url: https://status.unqork.com/
+  http_status: 200
+  title: Unqork Status
+  note: >-
+    Public status page covering platform availability. Wired separately in
+    apis.yml as `type: StatusPage`.
+
+sla:
+  url: null
+  uptime_target: null
+  note: >-
+    No public SLA or uptime commitment is published. Availability terms sit
+    inside the enterprise Terms of Service / MSA
+    (https://unqork.com/terms-of-service/) and the government EULA
+    (https://unqork.com/government-eula/), not on a public SLA page.
+
+support:
+  community: https://community.unqork.com/
+  product_updates: https://community.unqork.com/product-updates
+  documentation: https://docs.unqork.io/
+  training: https://academy.unqork.com/
+
+credential_lifecycle:
+  note: >-
+    API credentials have their own lifecycle, independent of the platform
+    release cycle.
+  expiration_min_days: 1
+  expiration_max_days: 730
+  default_validity_days: 90
+  statuses: [ACTIVE, EXPIRES SOON, EXPIRED, REVOKED, LOCKED]
+  expires_soon_threshold: 15% of the validity window remaining (14 days on a 90-day credential)
+  lockout: >-
+    Five failed client-secret attempts LOCK the credential; it automatically
+    reverts to ACTIVE after 30 minutes.
+  token_lifetime: 1 hour
+  docs: https://docs.unqork.io/docs/api-access-management
+
+cross_links:
+  changelog: changelog/unqork-changelog.yml
+  conventions: conventions/unqork-conventions.yml
+  authentication: authentication/unqork-authentication.yml

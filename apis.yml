@@ -1,23 +1,143 @@
 aid: unqork
 name: Unqork
-description: 'Unqork is a company surfaced via the API Evangelist harvest backlog (source: secondary-market)
-  and added to the network as a stub for full-pipeline profiling.'
+description: 'Unqork is an enterprise application development platform — a no-code / "codeless"
+  platform-as-a-service used by banks, insurers, healthcare organizations and government agencies to
+  build and operate complex, regulated business applications without hand-written application code.
+  Creators assemble applications from modules, workflows, components and data models in the Unqork
+  Designer, and the platform exposes a REST Customer API (documented as OpenAPI 3.0.3 at
+  developers.unqork.io) that lets external systems manage submissions, modules, applications,
+  workflows, users, groups, promotions, transforms, global variables and API access credentials in an
+  Unqork environment. The API is served per-tenant at https://{subdomain}.unqork.io/api/1.0, secured
+  with OAuth 2.0 client-credentials and password grants issued through API Access Management, and the
+  platform ships on a quarterly GA release cadence with weekly patch releases.'
+image: https://developers.unqork.io/unqork-logo.png
 url: https://raw.githubusercontent.com/api-evangelist/unqork/refs/heads/main/apis.yml
 x-type: company
 x-source: harvest:secondary-market
-x-tier: stub
-x-tier-reason: harvest
+x-tier: profiled
+x-tier-reason: enrichment-pipeline
 specificationVersion: '0.20'
 created: '2026-07-31'
 modified: '2026-07-31'
 tags:
 - Company
-apis: []
+- No-Code
+- Low-Code
+- Application Development
+- Enterprise Software
+- Platform as a Service
+- Workflow
+- Financial Services
+- Insurance
+- Government
+- Application Modernization
+apis:
+- name: Unqork Customer API
+  description: 'Unqork''s customer-facing REST API, based on open standards, for setting and
+    retrieving module submission data and controlling other aspects of an Unqork environment. 93
+    operations across Submissions, Applications, Workflow, Modules, Promotions, Users, Groups,
+    Transforms, Global Variables, Credentials, Revisions, Data Collections, Data Model Records,
+    Search Configs, Logs and Query. All communication is over HTTPS with JSON responses; every
+    request is authorized with an OAuth 2.0 bearer token.'
+  humanURL: https://developers.unqork.io/
+  baseURL: https://training.unqork.io/api/1.0
+  image: https://developers.unqork.io/unqork-logo.png
+  tags:
+  - Submissions
+  - Workflow
+  - Modules
+  - Applications
+  - Users
+  - Promotions
+  properties:
+  - type: OpenAPI
+    url: openapi/unqork-customer-api-openapi.yml
+  - type: Documentation
+    url: https://docs.unqork.io/docs/apis-integrations
+  - type: APIReference
+    url: https://developers.unqork.io/
+  - type: Authentication
+    url: authentication/unqork-authentication.yml
+  - type: OAuthScopes
+    url: scopes/unqork-scopes.yml
+  - type: RateLimits
+    url: rate-limits/unqork-rate-limits.yml
+  - type: Conventions
+    url: conventions/unqork-conventions.yml
+  - type: ErrorCatalog
+    url: errors/unqork-problem-types.yml
+  - type: DataModel
+    url: data-model/unqork-data-model.yml
+  - type: Overlay
+    url: overlays/unqork-customer-api-overlay.yaml
 maintainers:
 - FN: Kin Lane
   email: kin@apievangelist.com
 - FN: APIs.json
   email: info@apis.io
 common:
+- type: AgenticAccess
+  url: agentic-access/unqork-agentic-access.yml
+- type: DomainSecurity
+  url: security/unqork-domain-security.yml
 - type: Website
-  url: https://forgeglobal.com/unqork_stock/
+  url: https://unqork.com/
+- type: DeveloperPortal
+  url: https://developers.unqork.io/
+- type: Documentation
+  url: https://docs.unqork.io/
+- type: APIReference
+  url: https://developers.unqork.io/
+- type: GettingStarted
+  url: https://docs.unqork.io/docs/getting-started
+- type: Support
+  url: https://community.unqork.com/
+- type: Blog
+  url: https://unqork.com/resource-center/
+- type: GitHubOrganization
+  url: https://github.com/unqork-external
+- type: SignUp
+  url: https://community.unqork.com/member/register
+- type: Pricing
+  url: https://unqork.com/pricing-meeting-request/
+- type: TermsOfService
+  url: https://unqork.com/terms-of-service/
+- type: PrivacyPolicy
+  url: https://unqork.com/privacy/
+- type: StatusPage
+  url: https://status.unqork.com/
+- type: Security
+  url: https://unqork.com/security/
+- type: Compliance
+  url: https://unqork.com/security-compliance/
+- type: TrustCenter
+  url: https://trust.unqork.com/
+- type: ChangeLog
+  url: https://docs.unqork.io/docs/unqork-release-notes
+- type: Training
+  url: https://academy.unqork.com/
+- type: LLMsTxt
+  url: llms/unqork-llms.txt
+- type: VulnerabilityDisclosure
+  url: security/unqork-vulnerability-disclosure.yml
+- type: Lifecycle
+  url: lifecycle/unqork-lifecycle.yml
+- type: ChangeLog
+  url: changelog/unqork-changelog.yml
+- type: Conformance
+  url: conformance/unqork-conformance.yml
+- type: Packages
+  url: packages/unqork-packages.yml
+- type: Sandbox
+  url: sandbox/unqork-sandbox.yml
+- type: Components
+  url: components/unqork-components.yml
+- type: Webhooks
+  url: asyncapi/unqork-webhooks.yml
+- type: AgentSkill
+  url: skills/_index.yml
+x-enrichment:
+  date: '2026-07-31'
+  status: enriched
+  artifacts_added: 28
+  pass: local-v1

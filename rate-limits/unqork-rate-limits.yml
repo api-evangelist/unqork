@@ -1,0 +1,73 @@
+specification: API Commons Rate Limits
+specificationVersion: '0.1'
+provider: Unqork
+providerId: unqork
+generated: '2026-07-31'
+method: searched
+created: '2026-07-31'
+modified: '2026-07-31'
+tags:
+  - Rate Limiting
+  - No-Code
+  - Platform
+description: >-
+  Unqork enforces API rate limiting per source IP address, per server, in a
+  rolling 60-second window. The limit is an ENVIRONMENT-LEVEL SETTING an
+  administrator configures in Environment Administration, not a published
+  commercial tier: the platform default is 1000 requests and the smallest value
+  an administrator may enter is 100. Unqork explicitly recommends lowering it to
+  reduce brute-force, enumeration and HTTP request-flooding risk. The live API
+  advertises the current window in x-ratelimit-* response headers on every
+  request, including unauthenticated 401s.
+sources:
+  - https://docs.unqork.io/docs/environment-administration
+  - https://docs.unqork.io/docs/api-best-practices
+  - openapi/unqork-customer-api-openapi.yml
+headers:
+  limit: x-ratelimit-limit
+  remaining: x-ratelimit-remaining
+  reset: x-ratelimit-reset
+  reset_format: Unix epoch seconds
+  retry_after: null
+  requestId: null
+responseCodes:
+  throttled: 429
+scope: Per source IP address, per server
+window: 60 seconds
+configurable: true
+configured_by: Environment Administration → API Rate Limit (per Unqork environment)
+limits:
+  - name: API requests per IP (platform default)
+    scope: ip
+    metric: requests_per_minute
+    limit: 1000
+    timeFrame: minute
+    default: true
+    note: Default value of the Environment Administration "API Rate Limit" setting.
+  - name: API requests per IP (minimum configurable)
+    scope: ip
+    metric: requests_per_minute
+    limit: 100
+    timeFrame: minute
+    default: false
+    note: >-
+      Lowest value an administrator can enter. Unqork recommends setting the
+      limit low to reduce automated-attack surface.
+observed:
+  - host: training.unqork.io
+    endpoint: GET /api/1.0/users
+    observed_at: '2026-07-31'
+    http_status: 401
+    x_ratelimit_limit: 100
+    note: Public Training environment — configured at the documented minimum.
+  - host: marketplace.unqork.io
+    endpoint: GET /api/1.0/users
+    observed_at: '2026-07-31'
+    http_status: 401
+    x_ratelimit_limit: 1000
+    note: Configured at the platform default.
+related:
+  execution_limit: >-
+    Environment Administration also exposes a separate "Execution Limit" that
+    caps module executions independently of the HTTP rate limit.
+  conventions: conventions/unqork-conventions.yml

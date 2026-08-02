@@ -1,0 +1,184 @@
+generated: '2026-07-31'
+method: derived
+source: >-
+  openapi/unqork-customer-api-openapi.yml (every 4xx/5xx and `default` response)
+  plus a live probe of https://training.unqork.io/api/1.0/users on 2026-07-31
+format: custom
+format_note: >-
+  NOT RFC 9457. Unqork returns a flat JSON object on application/json — there is
+  no `type` URI, no `title`, no `instance`, and no application/problem+json media
+  type anywhere in the spec. Every operation declares a `default` response bound
+  to the shared `Error` schema, which is where nearly all failures land.
+envelope:
+  media_type: application/json
+  schema: '#/components/schemas/Error'
+  required: [code, message]
+  fields:
+    code:
+      type: integer (int32)
+      description: HTTP status code, restated in the body
+      enum: [400, 401, 403, 404, 412, 500]
+    message:
+      type: string
+      description: Human-readable error message
+  observed:
+    request: GET https://training.unqork.io/api/1.0/users (no Authorization header)
+    status: 401
+    body: '{"code":401,"message":"Unauthorized"}'
+
+execution_envelope:
+  description: >-
+    Module and workflow execution failures do not use the flat Error shape. They
+    return a structured validation/execution envelope so a caller can map a
+    failure back to the specific component that produced it.
+  schema: '#/components/schemas/FailedExecuteResponse'
+  fields:
+    validationErrors:
+      type: array
+      items: [id, path, label, parent, message]
+      description: Per-component validation failures, addressable by component path.
+    invalidNavigationPanels:
+      description: Navigation panels that failed validation.
+    executionError:
+      fields: [type, url, component, message, code]
+      description: >-
+        The single execution failure that stopped the run, including the
+        outbound URL and the component that raised it.
+  variants:
+    - schema: '#/components/schemas/FailedHandoffSubmissionToWorkflowResponse'
+      adds: [submissionId, statusCode]
+      operation: handoffSubmission
+    - schema: '#/components/schemas/FailedResumeWorkflowResponse'
+      adds: [submissionId, state, statusCode]
+      operation: resumeWorkflow
+
+problems:
+  - status: 400
+    title: Bad Request
+    schema: Error
+    description: >-
+      Malformed request. Declared explicitly on startTimerStartNode as
+      "TimerStart run once is already running"; otherwise reached through the
+      shared `default` response.
+    remediation: >-
+      Validate request body against the operation schema; for timer-start
+      operations, check listTimerStartNodes before starting or running-once.
+    source_operations:
+      - openapi/unqork-customer-api-openapi.yml#startTimerStartNode
+  - status: 401
+    title: Unauthorized
+    schema: Error
+    description: >-
+      Missing, malformed or expired bearer token. Unqork access tokens expire
+      after one hour.
+    remediation: >-
+      POST client credentials (or username/password, when the Password grant is
+      enabled in Environment Administration) to
+      /api/1.0/oauth2/access_token and retry with a fresh
+      `Authorization: Bearer` header.
+    verified_live: true
+  - status: 403
+    title: Forbidden
+    schema: Error
+    description: >-
+      The credential authenticated but its Express/Creator roles do not grant the
+      operation. Most operation descriptions name the required role under
+      "Authorization Required".
+    remediation: >-
+      Attach the required role to the credential in API Access Management, or use
+      a credential of the correct surface (Express vs Creator).
+  - status: 404
+    title: Not Found
+    schema: Error
+    description: >-
+      Referenced resource does not exist. Declared explicitly on the workflow
+      timer-start operations as "Timer start node not found".
+    remediation: >-
+      Verify the moduleId / submissionId / applicationId / workflowPath. Note
+      soft-deleted submissions are hidden unless `includeDeleted=true`.
+    source_operations:
+      - openapi/unqork-customer-api-openapi.yml#listTimerStartNodes
+      - openapi/unqork-customer-api-openapi.yml#startTimerStartNode
+      - openapi/unqork-customer-api-openapi.yml#stopTimerStartNode
+  - status: 412
+    title: Validation and/or execution error
+    schema: FailedExecuteResponse
+    description: >-
+      The distinctive Unqork failure code. A module or proxied API module ran but
+      failed validation or execution; the body carries validationErrors[],
+      invalidNavigationPanels and executionError rather than a flat message.
+      This is the code to branch on when driving executeModule or the
+      Execute-via-Proxy surface.
+    remediation: >-
+      Read validationErrors[].path to locate the failing component; fix the
+      submission payload and re-execute. For executionError, inspect
+      executionError.url and executionError.component to find the failing
+      outbound integration.
+    source_operations:
+      - openapi/unqork-customer-api-openapi.yml#executeModule
+      - openapi/unqork-customer-api-openapi.yml#apiProxySSEGet
+      - openapi/unqork-customer-api-openapi.yml#apiProxySSEPost
+      - openapi/unqork-customer-api-openapi.yml#apiProxySSEPut
+      - openapi/unqork-customer-api-openapi.yml#apiProxySSEPatch
+      - openapi/unqork-customer-api-openapi.yml#apiProxySSEDelete
+  - status: 422
+    title: Unprocessable Entity
+    schema: Error
+    description: >-
+      "App/workspace relationship does not exist, or options specified are
+      invalid" — raised when connecting an application to a workspace.
+    remediation: Confirm the application and workspace exist and are related before connecting.
+    source_operations:
+      - openapi/unqork-customer-api-openapi.yml#applicationsConnect
+  - status: 429
+    title: Too Many Requests
+    schema: Error
+    description: >-
+      Rate limit exceeded. NOT declared in the OpenAPI, but the live API returns
+      x-ratelimit-limit / x-ratelimit-remaining / x-ratelimit-reset on every
+      response and the platform enforces a per-IP, per-server, 60-second window.
+    remediation: >-
+      Back off until x-ratelimit-reset (Unix epoch seconds). No Retry-After
+      header is sent.
+    undeclared_in_spec: true
+    detail: rate-limits/unqork-rate-limits.yml
+  - status: 500
+    title: Internal Server Error
+    schema: Error
+    description: Unhandled server-side failure.
+    remediation: Retry with backoff; check the Logs Dashboard Tool and listAuditLogs for the trace.
+  - status: '4XX'
+    title: Custom client-side status (API modules)
+    schema: FailedExecuteResponse
+    description: >-
+      Custom HTTP status code set by server-side execution for API modules. An
+      Unqork Creator can define arbitrary 4xx responses on a module, so the
+      status surface of a proxied module is defined by the customer's own
+      configuration, not by Unqork.
+    source_operations:
+      - openapi/unqork-customer-api-openapi.yml#apiProxySSEGet
+      - openapi/unqork-customer-api-openapi.yml#apiProxySSEPost
+  - status: '5XX'
+    title: Custom server-side status (API modules)
+    schema: FailedExecuteResponse
+    description: Custom HTTP status code set by server-side execution for API modules.
+    source_operations:
+      - openapi/unqork-customer-api-openapi.yml#apiProxySSEPut
+      - openapi/unqork-customer-api-openapi.yml#apiProxySSEDelete
+
+coverage:
+  operations_total: 93
+  operations_with_default_error: 93
+  operations_with_explicit_4xx: 12
+  distinct_statuses_declared: [400, 404, 412, 422, '4XX', '5XX', default]
+
+gaps:
+  - >-
+    No machine-readable error identifiers. `code` merely restates the HTTP
+    status, so a client cannot distinguish "token expired" from "token
+    malformed" without string-matching `message`.
+  - No RFC 9457 problem+json and no per-error documentation URIs.
+  - 429 is enforced but never declared in the contract.
+  - >-
+    403 is enumerated in the Error schema's code enum but never attached to an
+    operation as an explicit response.

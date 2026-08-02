@@ -1,0 +1,188 @@
+generated: '2026-07-31'
+method: derived
+source: >-
+  openapi/unqork-customer-api-openapi.yml — path structure, component schema
+  $ref graph, and id-reference fields
+description: >-
+  The entity-relationship graph of the Unqork Customer API, derived from the
+  OpenAPI. Unqork's model is a containment hierarchy — a Workspace holds
+  Applications, an Application holds Modules and Workflows, and a Module or
+  Workflow holds Submissions, which are the actual business records. Everything
+  else (Transforms, Revisions, Global Variables, Data Collections, Data Models)
+  hangs off that spine, while Users, Groups, Roles and Credentials form the
+  access-control side and Promotions move configuration between environments.
+
+id_conventions:
+  form: >-
+    Opaque 24-character hexadecimal identifiers (MongoDB ObjectId shape). Client
+    IDs for API credentials are prefixed `uq`, e.g. `uq6478a3a52300ff7cf8ac55fc`.
+  no_type_prefix: true
+  note: >-
+    Apart from the `uq` credential prefix, ids are not type-prefixed, so an id
+    alone does not identify which entity it belongs to. Path position is the only
+    disambiguator.
+  observed_id_fields: [id, userId, moduleId, submissionId, formId, clientId, workspaceId,
+    workflowId, applicationId, dataSchemaIds, archiveId]
+
+entities:
+  - name: Workspace
+    description: Top-level container that owns applications.
+    path_evidence: /applications/{applicationId}/workspace
+    operations: [applicationsWorkspace, applicationsConnect]
+  - name: Application
+    description: >-
+      A deployable unit of Unqork configuration — modules, workflows, styles,
+      roles and reference data — versioned and promoted as a set.
+    schema: ApplicationResponse
+    operations: [applicationsGet, applicationsGetById, applicationsCreate, applicationsUpdate,
+      applicationsDeleteById, applicationsRestore, applicationsConnect, applicationsUniqueName,
+      applicationsDependencies, applicationsDataModelsDependencies, applicationModules,
+      applicationsComponentsExport, applicationsSubmissionDataModel, isInApplication]
+  - name: Module
+    description: >-
+      The core build unit. A module is a configured form/API surface that can be
+      rendered in Express View or executed server-side.
+    schema: ModuleResponse
+    operations: [getModules, getModule, restoreDeletedModule, executeModule, apiProxySSEGet,
+      apiProxySSEPost, apiProxySSEPut, apiProxySSEPatch, apiProxySSEDelete]
+  - name: Workflow
+    description: >-
+      A multi-step orchestration across modules, with steps, timer-start nodes,
+      timed events, handoff and resume semantics.
+    operations: [createWorkflowSubmission, createWorkflowSubmissionFromStep, resumeWorkflow,
+      handoffSubmission, restoreDeletedWorkflow, listTimerStartNodes, listTimedEventsBySubmissionId,
+      startTimerStartNode, stopTimerStartNode, runTimerStartNodeOnce]
+  - name: Submission
+    description: >-
+      The business record — the data a module or workflow captured. The single
+      most-touched entity in the API (16 operations).
+    schemas: [NewSubmissionRequest, UpdatedSubmissionRequest, UpdateSubmissionsRequest,
+      SavedSubmissionResponse, RetrievedSubmissionResponse, RetrievedSubmissionMergeResponse,
+      UpdatedSubmissionsResponse]
+    operations: [getModuleSubmissions, createModuleSubmissions, updateModuleSubmissions,
+      deleteModuleSubmissions, getModuleSubmission, updateModuleSubmission, deleteModuleSubmission,
+      restoreDeletedModuleSubmission, restoreDeletedWorkflowSubmission, getAllSubmissions,
+      getMergedSubmissions, getWorkflowSubmissions, deleteWorkflowSubmissions,
+      getWorkflowSubmission, deleteWorkflowSubmission, updateWorkflowSubmission]
+  - name: Revision
+    description: Point-in-time history of a submission, retrievable and restorable.
+    schemas: [RetrievedRevisionResponse, RetrievedRevisionsResponse]
+    operations: [getModuleSubmissionRevisions, getModuleSubmissionRevision,
+      getWorkflowSubmissionRevisions, getWorkflowSubmissionRevision]
+  - name: Transform
+    description: A named data transformation attached to a module.
+    schemas: [TransformPost, TransformPut, TransformResponse]
+    operations: [getTransforms, createTransform, getTransform, updateTransform, deleteTransform]
+  - name: GlobalVariable
+    description: Environment-scoped configuration value referenced across applications.
+    schemas: [GlobalVariable, GlobalVariablePost, GlobalVariablePatch]
+    operations: [promoteGlobalVariables, createGlobalVariable, getGlobalVariable,
+      updateGlobalVariable, deleteGlobalVariable]
+  - name: DataCollection
+    description: Reference data set accessible to modules; importable and promotable.
+    operations: [getDataCollectionList, importDataCollection, promoteDataCollection]
+  - name: DataModelRecord
+    description: >-
+      Records governed by a JSON-Schema-backed data model, validated
+      independently of any module.
+    schemas: [ModelRecord, ArrayOfModelRecords]
+    operations: [applicationsSubmissionDataModel, applicationsDataModelsDependencies]
+  - name: SearchConfig
+    description: A saved query definition that can be executed by id.
+    path_evidence: /searchConfigs/{queryId}/execute
+  - name: User
+    description: An Express or Creator identity in the environment.
+    schemas: [UserPost, UserPut, UserResponse]
+    operations: [getUsers, createUser, getUser, updateUser, deleteUser, getUserPasswordStatus]
+  - name: Group
+    description: Named collection of users, addressed by groupName rather than id.
+    schemas: [Group, GroupPost, GroupPut]
+    operations: [getGroups, createGroup, getGroup, updateGroup, deleteGroup]
+  - name: Role
+    description: >-
+      RBAC role (Express or Creator) that grants permissions. Not directly CRUD-able
+      through the Customer API — managed in Administration — but promotable and
+      referenced by users and credentials.
+    operations: [promoteRoles]
+  - name: Credential
+    description: >-
+      An API access credential (clientId / clientSecret) bound to one or more
+      Express or Creator roles, with an expiry and a revocable status.
+    schemas: [CredentialRequest, CredentialResponse]
+    operations: [credentialsGetAll, credentialsCreate, credentialsUpdate, credentialsDeleteById,
+      credentialsRevoke]
+  - name: Promotion
+    description: >-
+      A transfer of configuration (module, application items, reference data,
+      style, groups, roles) from one environment host to another.
+    schemas: [PromotionHosts, PromotionModuleExecuteRequest, PromotionApplicationByItemExecuteRequest,
+      PromotionReferenceDataExecuteRequest, PromotionStyleExecuteRequest,
+      PromotionGroupExecuteRequest, PromotionRoleExecuteRequest]
+    operations: [getPromotionHosts, promoteModule, promoteApplicationByItems, promoteDataCollection,
+      promoteStyle, promoteGroups, promoteRoles]
+  - name: AuditLog
+    description: Environment audit trail.
+    schema: ListAuditLogsResponse
+    operations: [listAuditLogs]
+
+relationships:
+  - {from: Workspace, to: Application, kind: has_many, via: workspaceId}
+  - {from: Application, to: Workspace, kind: belongs_to, via: workspaceId,
+     evidence: 'GET /applications/{applicationId}/workspace'}
+  - {from: Application, to: Module, kind: has_many, via: applicationId,
+     evidence: 'GET /applications/{applicationId}/modules'}
+  - {from: Application, to: Application, kind: has_many, via: dependencies,
+     evidence: 'GET /applications/{applicationId}/dependencies'}
+  - {from: Application, to: DataModelRecord, kind: has_many, via: dataSchemaIds,
+     evidence: 'GET /applications/{applicationId}/dataModels/dependencies'}
+  - {from: Module, to: Submission, kind: has_many, via: moduleId,
+     evidence: 'GET /modules/{moduleId}/submissions'}
+  - {from: Module, to: Transform, kind: has_many, via: moduleId,
+     evidence: 'GET /modules/{moduleId}/transforms'}
+  - {from: Module, to: DataCollection, kind: has_many, via: moduleId,
+     evidence: 'GET /modules/{moduleId}/accessibleDataCollections'}
+  - {from: Workflow, to: Submission, kind: has_many, via: workflowId,
+     evidence: 'GET /workflows/{workflowId}/submissions'}
+  - {from: Submission, to: Revision, kind: has_many, via: submissionId,
+     evidence: 'GET /modules/{moduleId}/submissions/{submissionId}/revisions'}
+  - {from: Submission, to: Module, kind: belongs_to, via: moduleId}
+  - {from: Submission, to: Workflow, kind: belongs_to, via: workflowId}
+  - {from: Submission, to: Submission, kind: has_many, via: submissionIds,
+     evidence: 'GET /submissions/merge/{submissionIds} merges sibling submissions'}
+  - {from: Workflow, to: TimerStartNode, kind: has_many, via: timerStartNodePath,
+     evidence: 'GET /workflows/{workflowPath}/timerstart'}
+  - {from: Workflow, to: TimedEvent, kind: has_many, via: submissionId,
+     evidence: 'GET /workflows/{workflowPath}/timedEvents/{submissionId}'}
+  - {from: User, to: Group, kind: has_many, via: groups,
+     evidence: getUsers filter supports a `groups` field}
+  - {from: User, to: Role, kind: has_many, via: applicationRoles,
+     evidence: getUsers filter supports `role` and `applicationRoles` fields}
+  - {from: Group, to: User, kind: has_many, via: groupName}
+  - {from: Credential, to: Role, kind: has_many, via: roles,
+     evidence: 'API Access Management requires at least one Express or Creator role per credential'}
+  - {from: Promotion, to: Module, kind: references, via: moduleId}
+  - {from: Promotion, to: Application, kind: references, via: applicationId}
+  - {from: Promotion, to: PromotionHosts, kind: belongs_to, via: host,
+     evidence: 'GET /promote/hosts lists the target environments'}
+
+schema_reuse_graph:
+  note: >-
+    59 component schemas with a shallow $ref graph — the error/validation types
+    are the only widely shared components.
+  most_referenced:
+    - {schema: ValidationErrors, referenced_by: 8}
+    - {schema: MetadataRequest, referenced_by: 4}
+    - {schema: ExecutionError, referenced_by: 3}
+    - {schema: InvalidNavigationPanels, referenced_by: 3}
+    - {schema: DataFilter, referenced_by: 3}
+    - {schema: MetadataFilter, referenced_by: 3}
+
+gaps:
+  - >-
+    Entity schemas are not cross-referenced. Submission responses do not $ref a
+    Module or Application schema, so the containment hierarchy is expressed only
+    in path structure, not in the type graph.
+  - >-
+    Role and Workspace have no first-class schema in the Customer API even though
+    both are load-bearing concepts.
+  - No id type prefixes, so ids are not self-describing.

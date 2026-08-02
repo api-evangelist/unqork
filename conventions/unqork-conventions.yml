@@ -1,0 +1,192 @@
+generated: '2026-07-31'
+method: searched
+source: >-
+  https://developers.unqork.io/ (OpenAPI 3.0.3 at
+  https://developers.unqork.io/api/1.0/openapi.yml) plus
+  https://docs.unqork.io/docs/apis-integrations and live probes of
+  https://training.unqork.io/api/1.0
+description: >-
+  Cross-cutting request/response semantics that apply to every operation of the
+  Unqork Customer API: how a tenant host is addressed, how requests are
+  authorized, how collections are paged/sorted/filtered, how errors come back,
+  how the API signals rate limits, and how versions move. Captured from the
+  OpenAPI, the documentation hub, and observed response headers.
+
+base_url: https://{subdomain}.unqork.io/api/1.0
+base_url_note: >-
+  Unqork is multi-tenant and every customer gets its own subdomain
+  (e.g. https://xyzfinancial.unqork.io/api/1.0). The OpenAPI declares a
+  templated server `https://{host}/api/1.0` whose `host` variable defaults to
+  the placeholder `env.unqork.io`, which does not resolve. Environments are
+  themselves tiered — Development, Staging, UAT, Production — each with its own
+  subdomain, so a promotion pipeline talks to several base URLs.
+api_style: REST over HTTPS, JSON request and response bodies
+
+authentication:
+  scheme: OAuth 2.0 bearer token
+  grants: [client_credentials, password]
+  token_endpoint: https://{subdomain}.unqork.io/api/1.0/oauth2/access_token
+  token_lifetime: 1 hour — a new token must be retrieved after expiry
+  credential_source: >-
+    Client ID / Client Secret are minted in Administration → API Access
+    Management. Credentials are issued separately for the Express surface
+    (end-user facing) and the Creator surface (design-time), and each must be
+    bound to at least one Express or Creator role.
+  header: 'Authorization: Bearer {access_token}'
+  detail: authentication/unqork-authentication.yml
+  docs: https://docs.unqork.io/docs/api-access-management
+
+authorization:
+  model: RBAC (role-based access control)
+  note: >-
+    The OAuth2 scheme declares a single placeholder scope (`none: N/A`);
+    authorization is NOT scope-based. What a token can do is determined by the
+    Express/Creator roles attached to its credential, and most operation
+    descriptions in the spec carry an "### Authorization Required:" line naming
+    the role (e.g. "Designer Administrator").
+  detail: scopes/unqork-scopes.yml
+
+idempotency:
+  supported: false
+  mechanism: null
+  evidence: >-
+    The OpenAPI contains no Idempotency-Key parameter, no If-Match/If-None-Match
+    conditional headers and no ETag responses, and the documentation hub
+    publishes no idempotency-key contract. Retrying a POST such as
+    createModuleSubmissions or createUser will create duplicate records.
+  note: >-
+    Recorded honestly as unsupported — no `Idempotency` pointer is wired in
+    apis.yml. Safe-retry helpers that do exist are narrower: `destroy`,
+    `includeDeleted` and the `restoreDeletedModuleSubmission` /
+    `restoreDeletedModule` / `restoreDeletedWorkflow` operations make deletes
+    reversible rather than making writes replay-safe.
+
+pagination:
+  style: offset
+  request_params:
+    limit: >-
+      Maximum number of results to return. Defaults and ceilings are per
+      operation — e.g. getUsers defaults to 50 with a maximum of 500.
+    offset: Number of results to skip before returning the page.
+    sort: >-
+      Field to sort by. `field` ascending, `-field` descending; comma-separate
+      for multiple sort orders.
+    sortBy: Field name to sort by (submission-oriented operations).
+    sortOrder: Sort direction for the sortBy field.
+  response_fields: >-
+    Paged endpoints return the collection directly; there is no cursor, no
+    `has_more` flag and no `next` link. Callers page by incrementing `offset`
+    until a short page comes back.
+  auto_pagination: false
+  docs: https://docs.unqork.io/docs/paginated-submissions-api-snippet
+
+filtering:
+  mechanism: >-
+    A `filter` query parameter with `field=value` conditions, `;`-separated.
+    All filter conditions are "starts with". Reserved URL characters in values
+    must be percent-encoded.
+  example: '?filter=name=Bill;role=admin'
+  supported_fields_example:
+    getUsers: [role, name, phone, email, userId, groups, applicationRoles]
+  timestamps: >-
+    When filtering on `created` and `modified`, all timestamps are UTC.
+  additional:
+    metadataFilter: Filter submissions on submission metadata.
+    dataFields: Restrict which submission data fields are returned (sparse fieldsets).
+    ids: Fetch a specific set of ids.
+    includeDeleted: Include soft-deleted records.
+    includeRaw: Return raw submission data alongside resolved data.
+    includeBase64: Inline file content as base64.
+    resolveCloudStorageUrls: Resolve stored file references to signed cloud-storage URLs.
+
+sparse_fields:
+  supported: true
+  mechanism: >-
+    `dataFields` query parameter on submission read operations, limiting the
+    returned submission payload to the named fields.
+
+metadata:
+  supported: true
+  mechanism: >-
+    Submissions carry a metadata object (MetadataRequest / MetadataFilter
+    schemas). Metadata can be written on create/update and used as a filter
+    dimension via `metadataFilter`.
+
+request_tracing:
+  request_id_header: null
+  note: >-
+    No request-id or correlation-id header is documented or observed. Operational
+    tracing is done server-side through the Logs Dashboard Tool and the
+    `listAuditLogs` operation (GET /logs/audit-logs), not through a per-request
+    identifier returned to the caller.
+  audit_log_operation: listAuditLogs
+
+versioning:
+  scheme: uri-path
+  current: '1.0'
+  path: /api/1.0
+  note: >-
+    The REST surface is pinned at /api/1.0 and has been stable across platform
+    majors. The PLATFORM version (8.0, 8.2, 9.0) moves independently on a
+    quarterly GA cadence and is not encoded in the API path, so a platform
+    upgrade can change behaviour behind an unchanged URI.
+  detail: lifecycle/unqork-lifecycle.yml
+
+error_envelope:
+  format: custom JSON object (NOT RFC 9457 application/problem+json)
+  content_type: application/json
+  schema: '#/components/schemas/Error'
+  shape:
+    code: HTTP status code as an integer — enum [400, 401, 403, 404, 412, 500]
+    message: Human-readable error message string
+  observed_example: '{"code":401,"message":"Unauthorized"}'
+  execution_errors: >-
+    Module/workflow execution failures return a richer envelope
+    (FailedExecuteResponse) with `validationErrors[]` (id, path, label, parent,
+    message), `invalidNavigationPanels` and `executionError`
+    (type, url, component, message, code) instead of the flat Error shape.
+  custom_status_codes: >-
+    API modules configured with server-side execution may return caller-defined
+    4XX/5XX status codes, which the spec models as literal `4XX` / `5XX`
+    response keys on the Execute-via-Proxy operations.
+  detail: errors/unqork-problem-types.yml
+
+rate_limit_signaling:
+  headers:
+    - x-ratelimit-limit
+    - x-ratelimit-remaining
+    - x-ratelimit-reset
+  reset_format: Unix epoch seconds
+  observed: true
+  note: >-
+    Headers are returned on every response including unauthenticated 401s. They
+    are NOT declared in the OpenAPI. No Retry-After header was observed.
+  detail: rate-limits/unqork-rate-limits.yml
+
+content_types:
+  request: application/json
+  response: application/json
+  exceptions:
+    - >-
+      applicationsComponentsExport returns text/csv.
+    - >-
+      Execute-via-Proxy operations (apiProxySSEGet/Post/Put/Patch/Delete) accept
+      arbitrary payload formats, including XML, so an Unqork module can act as a
+      webhook receiver for services that do not speak JSON. Responses from
+      Unqork are always JSON, sourced from `data.resolved`.
+
+transport_security:
+  https_required: true
+  hsts: 'max-age=63072000; includeSubDomains; preload (observed on *.unqork.io tenants)'
+  mtls: >-
+    Client mTLS certificates can be paired with OAuth 2.0 for outbound
+    integrations (docs: how-to-setup-an-mtls-certificate-with-oauth-20-authentication).
+  detail: security/unqork-domain-security.yml
+
+cross_links:
+  authentication: authentication/unqork-authentication.yml
+  scopes: scopes/unqork-scopes.yml
+  errors: errors/unqork-problem-types.yml
+  lifecycle: lifecycle/unqork-lifecycle.yml
+  rate_limits: rate-limits/unqork-rate-limits.yml
+  data_model: data-model/unqork-data-model.yml

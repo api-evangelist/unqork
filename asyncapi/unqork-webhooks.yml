@@ -1,0 +1,118 @@
+generated: '2026-07-31'
+method: searched
+source: >-
+  https://docs.unqork.io/docs/consuming-payloads-using-webhooks,
+  https://docs.unqork.io/docs/webhook-api-snippet,
+  openapi/unqork-customer-api-openapi.yml
+spec_type: none
+asyncapi_published: false
+description: >-
+  Unqork publishes NO AsyncAPI document and NO outbound event catalog. Its event
+  surface runs in the opposite direction from most API providers: Unqork does not
+  emit webhooks to you — it RECEIVES them. A Creator turns an Unqork module into a
+  webhook endpoint, hands that module URL to an external service (DocuSign,
+  Stripe, …), and the module executes when the external service posts to it. This
+  is a real, documented, first-class event surface with dedicated API operations,
+  so it is captured here as a Webhooks artifact — but the direction is recorded
+  explicitly so nobody mistakes it for a subscribe-to-Unqork-events product.
+
+direction: inbound
+direction_note: >-
+  Unqork is the LISTENER. There is no event catalog to subscribe to, no event
+  types enumerated, no signature-verification scheme, no delivery-retry policy
+  and no webhook-management API — because Unqork is not the producer.
+
+surface:
+  mechanism: Unqork module acting as a webhook receiver
+  endpoint_shape: >-
+    The receiving module's own URL in the customer's environment. The generic
+    "Execute via Proxy" operations on the Customer API are what accept the
+    inbound call.
+  operations:
+    - operationId: apiProxySSEPost
+      method: POST
+      path: /modules/{moduleId}/api
+      note: >-
+        The primary webhook receiver. Webhooks usually arrive as POST. "SSE" in
+        the operationId is Server-Side Execution, not Server-Sent Events.
+    - operationId: apiProxySSEGet
+      method: GET
+      path: /modules/{moduleId}/api
+    - operationId: apiProxySSEPut
+      method: PUT
+      path: /modules/{moduleId}/api
+    - operationId: apiProxySSEPatch
+      method: PATCH
+      path: /modules/{moduleId}/api
+    - operationId: apiProxySSEDelete
+      method: DELETE
+      path: /modules/{moduleId}/api
+  content_types:
+    inbound: >-
+      Any. Execute via Proxy accepts arbitrary request formats including XML,
+      which is why it exists — the rest of the Unqork API is JSON-only.
+    outbound: >-
+      Always JSON, sourced from `data.resolved`. An external service that
+      requires an XML response cannot be served by an Unqork webhook module; that
+      integration must be built as an outbound API call instead.
+  failure_response: >-
+    412 with a FailedExecuteResponse envelope (validationErrors[],
+    invalidNavigationPanels, executionError) when the module runs but fails
+    validation or execution. API modules with server-side execution may also
+    return Creator-defined 4XX/5XX statuses.
+
+security:
+  model: >-
+    An external service is an anonymous user to Unqork. To receive a webhook the
+    Creator must grant anonymous-user RBAC permissions on the receiving module,
+    which makes the module URL publicly callable.
+  signature_verification: null
+  shared_secret: null
+  risk_note: >-
+    Unqork documents this openly: "sharing a URL will make it publicly
+    accessible. While discovering the URL and using it maliciously is unlikely,
+    the risk does exist." Unqork's own recommended mitigation is to use an
+    outbound API call instead of a webhook. There is no built-in HMAC signature
+    check, timestamp/replay window, or allow-list documented for the receiver.
+  conventions:
+    naming: >-
+      Unqork's best practice is to include `postback` in the receiving module's
+      ID and title, e.g. `postbackDocuSign`.
+
+documented_integrations:
+  - {partner: DocuSign, use_case: 'DocuSign Connect envelope-status callback',
+     docs: 'https://docs.unqork.io/docs/how-to-consume-a-docusign-connect-webhook'}
+  - {partner: Stripe, use_case: 'invoice payment failures, payments needing further authorization, subscription status and changes'}
+
+other_event_mechanisms:
+  - name: Workflow timer-start nodes
+    kind: scheduled trigger
+    description: >-
+      Time-based workflow triggers the Customer API can list, start, stop and
+      test-run. The nearest thing Unqork has to an internal event producer.
+    operations: [listTimerStartNodes, startTimerStartNode, stopTimerStartNode, runTimerStartNodeOnce]
+  - name: Timed events
+    kind: scheduled per-submission event
+    description: Pending timed events attached to a workflow submission.
+    operations: [listTimedEventsBySubmissionId]
+  - name: Email notifications
+    kind: outbound email (not webhooks)
+    description: >-
+      `shouldNotify` query parameters on createUser / updateUser control
+      "New Account (Token Invitation)" and "User Changed" emails. This is the only
+      outbound notification the Customer API triggers.
+  - name: Audit logs
+    kind: pull-based event log
+    description: Environment audit trail, polled rather than pushed.
+    operations: [listAuditLogs]
+
+gaps:
+  - No AsyncAPI document — nothing to harvest, nothing fabricated.
+  - >-
+    No outbound event catalog: an integrator cannot subscribe to
+    "submission.created" or "workflow.completed". Change detection requires
+    polling getAllSubmissions or listAuditLogs.
+  - >-
+    No signature verification on the inbound receiver, and receiving a webhook
+    requires opening the module to anonymous users.
+  - No webhook delivery/retry semantics, because Unqork is not the sender.

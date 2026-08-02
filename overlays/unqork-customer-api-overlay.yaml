@@ -1,0 +1,173 @@
+overlay: 1.0.0
+info:
+  title: API Evangelist enhancements for the Unqork Customer API
+  version: 1.0.0
+extends: openapi/unqork-customer-api-openapi.yml
+x-generated: '2026-07-31'
+x-method: generated
+x-source: >-
+  Derived from the harvested OpenAPI at
+  https://developers.unqork.io/api/1.0/openapi.yml plus live probes of
+  https://training.unqork.io/api/1.0 on 2026-07-31. This overlay records API
+  Evangelist's enhancements; the harvested specification is never mutated.
+actions:
+  - target: $.info
+    description: Attach API Evangelist provenance and rating metadata.
+    update:
+      x-apievangelist-provider: unqork
+      x-apievangelist-harvested: '2026-07-31'
+      x-apievangelist-source: https://developers.unqork.io/api/1.0/openapi.yml
+      x-apievangelist-artifacts:
+        authentication: authentication/unqork-authentication.yml
+        conventions: conventions/unqork-conventions.yml
+        errors: errors/unqork-problem-types.yml
+        rate_limits: rate-limits/unqork-rate-limits.yml
+        lifecycle: lifecycle/unqork-lifecycle.yml
+        data_model: data-model/unqork-data-model.yml
+        conformance: conformance/unqork-conformance.yml
+        agentic_access: agentic-access/unqork-agentic-access.yml
+        skills: skills/_index.yml
+
+  - target: $.servers
+    description: >-
+      Record that the declared server host variable defaults to the placeholder
+      `env.unqork.io`, which does not resolve in DNS. Unqork is multi-tenant and
+      the host must be replaced with the customer subdomain. Verified reachable
+      example hosts are listed for tooling that needs a resolvable origin.
+    update:
+      x-apievangelist-host-note: >-
+        The `host` variable default `env.unqork.io` is a placeholder and does not
+        resolve. Substitute your environment subdomain, e.g.
+        xyzfinancial.unqork.io.
+      x-apievangelist-verified-hosts:
+        - {host: training.unqork.io, kind: public training environment, probed: '2026-07-31', status: 401}
+        - {host: marketplace.unqork.io, kind: marketplace environment, probed: '2026-07-31', status: 401}
+
+  - target: $.components.securitySchemes.OAuth2
+    description: >-
+      Annotate the OAuth2 scheme. The single declared scope `none: N/A` is a
+      placeholder — authorization is RBAC via Express/Creator roles bound to a
+      credential, not scope-based — and the password grant is discouraged by
+      RFC 9700 / OAuth 2.1.
+    update:
+      x-apievangelist-authorization-model: rbac
+      x-apievangelist-scopes-are-placeholder: true
+      x-apievangelist-token-lifetime-seconds: 3600
+      x-apievangelist-credential-management: https://docs.unqork.io/docs/api-access-management
+      x-apievangelist-grant-warning: >-
+        The `password` (resource-owner password credentials) grant is deprecated
+        by OAuth 2.1 and discouraged by RFC 9700. It is disabled by default and
+        must be enabled per environment in Environment Administration; prefer
+        clientCredentials.
+
+  - target: $.components.schemas.Error
+    description: >-
+      Annotate the shared error envelope: it is not RFC 9457, and `code` merely
+      restates the HTTP status rather than identifying the error condition.
+    update:
+      x-apievangelist-error-format: custom
+      x-apievangelist-rfc9457: false
+      x-apievangelist-machine-readable-code: false
+      x-apievangelist-note: >-
+        `code` duplicates the HTTP status. There is no stable error identifier, so
+        clients must string-match `message` to distinguish conditions. Catalogued
+        in errors/unqork-problem-types.yml.
+
+  - target: $.paths..responses
+    description: >-
+      Record the undeclared rate-limit response headers observed on every
+      response from the live API, including unauthenticated 401s. These are not
+      present in the harvested specification.
+    update:
+      x-apievangelist-rate-limit-headers:
+        x-ratelimit-limit: Requests permitted in the current 60-second window
+        x-ratelimit-remaining: Requests remaining in the current window
+        x-ratelimit-reset: Unix epoch seconds at which the window resets
+      x-apievangelist-undeclared-status:
+        '429': >-
+          Rate limit exceeded. Enforced by the platform but never declared in the
+          specification. No Retry-After header is sent.
+
+  - target: $.paths['/modules/{moduleId}/submissions'].post
+    description: >-
+      Flag the absence of an idempotency contract on the most-used write
+      operation. A retried create produces a duplicate submission.
+    update:
+      x-apievangelist-idempotent: false
+      x-apievangelist-retry-guidance: >-
+        No Idempotency-Key is supported. Do not blind-retry on timeout — read back
+        with getModuleSubmissions using a metadataFilter or a caller-supplied
+        correlation field in the submission data before retrying.
+
+  - target: $.paths['/modules/{moduleId}/api'].post
+    description: >-
+      Clarify the Execute-via-Proxy surface: "SSE" is Server-Side Execution, not
+      Server-Sent Events, and this is the endpoint that makes an Unqork module a
+      webhook receiver.
+    update:
+      x-apievangelist-sse-disambiguation: >-
+        SSE in these operationIds means Server-Side Execution. This is not a
+        Server-Sent Events / streaming endpoint.
+      x-apievangelist-role: webhook-receiver
+      x-apievangelist-detail: asyncapi/unqork-webhooks.yml
+      x-apievangelist-security-note: >-
+        Receiving external webhooks requires granting anonymous-user RBAC
+        permissions on the module, making its URL publicly callable. No signature
+        verification is provided.
+
+  - target: $.tags
+    description: >-
+      Declare the ten tags used by operations but missing from the top-level tags
+      array. The harvested spec declares only Users, Groups, Promotions,
+      Applications and Transforms, while operations use seventeen distinct tags —
+      so twelve tag groups render without a description in any tooling that reads
+      the tags array.
+    update:
+      x-apievangelist-undeclared-tags:
+        - {name: Submissions, operations: 16}
+        - {name: Workflow, operations: 10}
+        - {name: Modules, operations: 9}
+        - {name: Global Variables, operations: 5}
+        - {name: Credentials, operations: 5}
+        - {name: Revisions, operations: 4}
+        - {name: Data Collections, operations: 2}
+        - {name: Authentication, operations: 1}
+        - {name: Logs, operations: 1}
+        - {name: Data Model Records, operations: 1}
+        - {name: Search Configs, operations: 1}
+        - {name: Query, operations: 1}
+
+  - target: $.paths['/models/validateFromSchema'].post
+    description: Supply the missing operationId.
+    update:
+      x-apievangelist-suggested-operation-id: validateFromSchema
+      x-apievangelist-gap: >-
+        This operation has no operationId in the harvested spec, so generated
+        clients name it positionally.
+
+  - target: $.paths['/searchConfigs/{queryId}/execute'].post
+    description: Supply the missing operationId.
+    update:
+      x-apievangelist-suggested-operation-id: executeSearchConfig
+      x-apievangelist-gap: >-
+        This operation has no operationId in the harvested spec, so generated
+        clients name it positionally.
+
+x-apievangelist-review:
+  strengths:
+    - All 93 operations carry both a summary and a description.
+    - 91 of 93 operations have unique operationIds.
+    - 59 reusable component schemas; no inline-only response bodies.
+    - >-
+      Operation descriptions name the required RBAC role under
+      "Authorization Required", which is unusually explicit.
+    - A single global security requirement applies OAuth2 to every operation.
+  gaps:
+    - Zero response examples anywhere in the specification.
+    - Two operations have no operationId.
+    - Twelve of seventeen tags in use are undeclared in the top-level tags array.
+    - '429 is enforced but never declared; rate-limit headers are undeclared.'
+    - No idempotency contract on any write operation.
+    - Errors are a bare {code, message} object rather than RFC 9457 problem+json.
+    - The declared default server host does not resolve.
+    - OAuth2 scopes are a single placeholder value.

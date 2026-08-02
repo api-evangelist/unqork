@@ -1,0 +1,101 @@
+generated: '2026-07-31'
+method: searched
+source: >-
+  npm registry search, PyPI, https://github.com/unqork-external,
+  https://docs.unqork.io/ SDK documentation
+description: >-
+  Unqork publishes NO first-party server-side client SDK for the Customer API in
+  any public package registry. Integration is expected to be done directly over
+  HTTPS from any language, or from inside the platform via Plug-In components and
+  API modules. The only first-party developer kit Unqork ships is the BYO
+  (Bring Your Own) Component SDK, which is a browser-side web-component contract
+  documented in the docs hub rather than distributed as a package.
+  Because there is no official client library, no `SDKs` pointer is wired in
+  apis.yml — that would misrepresent the surface.
+
+official_client_sdks: []
+official_client_sdk_count: 0
+
+first_party_developer_kits:
+  - name: BYO Component SDK (External Component V1 SDK)
+    kind: browser web-component SDK
+    registry: null
+    distribution: >-
+      Documented contract, not a published package. Creators author a standard
+      Web Component (default export, `initialize(config, api)`) and register its
+      URL against a `byoc` component in the Unqork Designer.
+    language: typescript
+    official: true
+    url: https://docs.unqork.io/docs/bring-your-own-byo-component-sdk-software-development-kit
+    detail: components/unqork-components.yml
+  - name: BYO Runtime Engine API
+    kind: runtime extension API
+    registry: null
+    official: true
+    url: https://docs.unqork.io/docs/bring-your-own-byo-understanding-runtime-engine-api
+
+open_source:
+  - name: unqork-external/runtime-specification
+    org: unqork-external
+    url: https://github.com/unqork-external/runtime-specification
+    language: TypeScript
+    license: AGPL-3.0
+    official: true
+    description: >-
+      Unqork's open JSON-based specification for representing enterprise-grade
+      Unqork applications. A specification/schema project, not a client library.
+    last_pushed: '2026-04-28'
+
+github:
+  organization: https://github.com/unqork-external
+  public_repos: 3
+  note: >-
+    `github.com/unqork` is not a GitHub organization (404 from the API); the
+    public org is `unqork-external`, holding runtime-specification plus two
+    security-tooling repos (tomisp, pySigma-backend-dictquery). No client SDK is
+    published there.
+
+community_packages:
+  - language: javascript
+    registry: npm
+    name: unqork
+    version: 1.0.6
+    url: https://www.npmjs.com/package/unqork
+    repository: https://github.com/nenadzero/unqork
+    publisher: nprodovic
+    license: Apache-2.0
+    official: false
+    unofficial_note: >-
+      The package's own description states "This is not the official
+      repository". Wraps submission get/update/delete and revisions.
+    install: npm install unqork
+  - language: javascript
+    registry: npm
+    name: unqork-web
+    version: 0.0.5
+    url: https://www.npmjs.com/package/unqork-web
+    repository: https://github.com/kashif-raza2019/unqork-web
+    publisher: kashifraza
+    official: false
+    install: npm install unqork-web
+
+registries_probed:
+  - {registry: npm, query: unqork, official_hits: 0}
+  - {registry: pypi, names: [unqork, unqork-sdk], status: 404}
+  - {registry: github, org: unqork-external, client_sdks: 0}
+  - {registry: github, org: unqork, status: 404 (not an organization)}
+
+alternatives_documented_by_unqork:
+  - name: Postman
+    note: >-
+      Unqork documents importing its OpenAPI description into Postman as a
+      collection with all API calls organised in folders
+      (docs: testing-api-endpoints-using-third-party-applications). Unqork does
+      NOT publish an official Postman workspace — the only public workspaces
+      matching "unqork" are third-party user workspaces, so no `Postman` pointer
+      is wired.
+  - name: Plug-In component
+    note: >-
+      In-platform integration surface for calling internal and external services
+      from a module, used instead of an SDK for most customer work.
+    url: https://docs.unqork.io/docs/plug-in-component

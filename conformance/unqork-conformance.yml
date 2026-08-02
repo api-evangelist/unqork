@@ -1,0 +1,159 @@
+generated: '2026-07-31'
+method: searched
+source: >-
+  openapi/unqork-customer-api-openapi.yml, https://unqork.com/security-compliance/,
+  https://trust.unqork.com/, https://docs.unqork.io/
+description: >-
+  Which cross-cutting technical standards the Unqork Customer API conforms to,
+  and which organisational compliance programs Unqork publishes. Technical
+  conformance is derived from the OpenAPI and live probes; compliance posture is
+  searched from Unqork's own security & compliance pages.
+
+standards:
+  - id: openapi-3.0
+    conforms: true
+    evidence: >-
+      OpenAPI 3.0.3 document served at
+      https://developers.unqork.io/api/1.0/openapi.yml and rendered with ReDoc at
+      https://developers.unqork.io/. 64 paths, 93 operations, 59 component
+      schemas; every operation carries a summary and description.
+  - id: oauth2
+    conforms: true
+    evidence: >-
+      components.securitySchemes.OAuth2 type oauth2 with clientCredentials and
+      password flows; a global `security: [{OAuth2: []}]` requirement applies it
+      to every operation. Token endpoint /api/1.0/oauth2/access_token.
+  - id: oauth2-client-credentials
+    conforms: true
+    evidence: RFC 6749 §1.3.4 client credentials grant, cited by name in the spec.
+  - id: oauth2-password-grant
+    conforms: true
+    evidence: >-
+      RFC 6749 §1.3.3 resource-owner password credentials grant, enabled per
+      environment in Environment Administration. NOTE this grant is deprecated by
+      OAuth 2.1 and discouraged by RFC 9700 (BCP for OAuth 2.0 Security).
+    caveat: deprecated-grant
+  - id: oauth2-scopes
+    conforms: false
+    evidence: >-
+      The only scope declared is the placeholder `none: N/A`. Authorization is
+      RBAC via Express/Creator roles bound to a credential, not scope-based.
+  - id: rfc8414-oauth-authorization-server-metadata
+    conforms: false
+    evidence: >-
+      /.well-known/oauth-authorization-server returns no document on any Unqork
+      host (see well-known/unqork-well-known.yml).
+  - id: oidc
+    conforms: false
+    evidence: >-
+      No openIdConnect security scheme and no /.well-known/openid-configuration.
+      Unqork supports SAML SSO into the platform (community SSO proxy uses
+      ssoType=saml) but the Customer API itself is OAuth 2.0 only.
+  - id: rfc9457-problem-details
+    conforms: false
+    evidence: >-
+      Errors are a custom {code, message} JSON object on application/json. No
+      application/problem+json media type appears anywhere in the spec.
+  - id: rfc9116-security-txt
+    conforms: false
+    evidence: >-
+      No /.well-known/security.txt served, despite a real disclosure program at
+      https://unqork.com/security/ with psirt@unqork.com and a published PGP key.
+  - id: rfc9727-api-catalog
+    conforms: false
+    evidence: /.well-known/api-catalog returns no document.
+  - id: rfc8594-sunset-header
+    conforms: false
+    evidence: >-
+      No Sunset or Deprecation header support documented; zero deprecated
+      operations in the spec; no published deprecation policy.
+  - id: idempotency-key
+    conforms: false
+    evidence: >-
+      No Idempotency-Key parameter, no If-Match/If-None-Match, no ETag anywhere
+      in the spec or the docs.
+  - id: ietf-ratelimit-headers
+    conforms: false
+    partial: true
+    evidence: >-
+      Rate limits ARE signalled, but with the de-facto `x-ratelimit-limit` /
+      `x-ratelimit-remaining` / `x-ratelimit-reset` headers rather than the
+      RFC 9745-track `RateLimit` / `RateLimit-Policy` fields. Headers are
+      undeclared in the OpenAPI.
+  - id: pagination
+    conforms: true
+    style: offset
+    evidence: >-
+      `limit` / `offset` / `sort` / `sortBy` / `sortOrder` query parameters on
+      collection operations; getUsers defaults limit=50, maximum 500.
+  - id: json-schema
+    conforms: true
+    evidence: >-
+      59 reusable components.schemas in the OpenAPI; the platform additionally
+      exposes JSON Schema-driven data models (Data Model Records, JSON Schema
+      Component Mapping, POST /models/validateFromSchema).
+  - id: json-api
+    conforms: false
+    evidence: Plain JSON payloads; no JSON:API document structure or media type.
+  - id: graphql
+    conforms: false
+    evidence: No GraphQL endpoint documented or discovered.
+  - id: asyncapi
+    conforms: false
+    evidence: >-
+      No AsyncAPI document published. Unqork documents an inbound webhook
+      receiver pattern (see asyncapi/unqork-webhooks.yml) but publishes no event
+      catalog or event schema contract.
+  - id: mcp
+    conforms: false
+    evidence: >-
+      No official Model Context Protocol server found. A candidate tool surface
+      is derived in mcp/unqork-mcp.yml.
+  - id: a2a
+    conforms: false
+    evidence: >-
+      No A2A Agent Card at /.well-known/agent-card.json or /.well-known/agent.json
+      on any host. unqork.com answers 200 with an HTML catch-all for every
+      /.well-known/ path — a false positive, not a card.
+  - id: mutual-tls
+    conforms: true
+    partial: true
+    evidence: >-
+      Documented for OUTBOUND integrations from Unqork modules
+      (docs: how-to-setup-an-mtls-certificate-with-oauth-20-authentication), not
+      as an inbound securityScheme on the Customer API.
+  - id: tls-1.3
+    conforms: true
+    evidence: >-
+      TLSv1.3 observed on unqork.com, developers.unqork.io and training.unqork.io;
+      HSTS max-age=63072000 with includeSubDomains and preload on *.unqork.io.
+  - id: wcag-accessibility
+    conforms: true
+    partial: true
+    evidence: >-
+      Unqork publishes an accessibility practice, an Accessibility Rulebook and
+      ARIA settings reference for applications built on the platform
+      (docs: building-accessible-unqork-applications). This governs generated
+      applications, not the REST API.
+
+compliance:
+  published: true
+  url: https://unqork.com/security-compliance/
+  trust_center: https://trust.unqork.com/
+  programs:
+    - {name: SOC 2 Type II, status: certified, cadence: annual examination}
+    - {name: ISO/IEC 27001:2013, status: certified}
+    - {name: HIPAA, status: aligned}
+    - {name: FedRAMP, status: listed in the FedRAMP Marketplace}
+    - {name: GDPR, status: processor}
+    - {name: FIPS 140 validated cryptography, status: in use}
+  detail: security/unqork-trust-center.yml
+
+summary:
+  conforms_count: 9
+  not_conforms_count: 11
+  strongest: OpenAPI 3.0.3 coverage, OAuth 2.0, TLS/HSTS posture, published compliance program
+  weakest: >-
+    Web-standards hygiene — no security.txt, no OAuth metadata document, no
+    problem+json, no idempotency, no deprecation contract, no event spec, and a
+    deprecated password grant still on the table.

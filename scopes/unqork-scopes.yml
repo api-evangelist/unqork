@@ -1,0 +1,92 @@
+generated: '2026-07-31'
+method: searched
+source: openapi/unqork-customer-api-openapi.yml
+docs: https://docs.unqork.io/docs/api-access-management
+description: >-
+  Unqork's Customer API is OAuth 2.0, but it is NOT scope-based. The OpenAPI
+  declares exactly one scope — the placeholder `none` with the description `N/A` —
+  on both flows, and no operation requests a scope in its `security[]`
+  requirement. Authorization is instead RBAC: what a token can do is decided by
+  the Express or Creator roles bound to the credential that minted it, in
+  Administration → API Access Management. This file records that honestly rather
+  than presenting a one-entry placeholder list as a scope surface.
+
+authorization_model: rbac
+scope_based: false
+
+schemes:
+  - name: OAuth2
+    source: openapi/unqork-customer-api-openapi.yml
+    flows:
+      - flow: clientCredentials
+        tokenUrl: https://{subdomain}.unqork.io/api/1.0/oauth2/access_token
+        spec_tokenUrl: https://xyzfinancial.unqork.io/api/1.0/oauth2/access_token
+        rfc: RFC 6749 §1.3.4
+      - flow: password
+        tokenUrl: https://{subdomain}.unqork.io/api/1.0/oauth2/access_token
+        spec_tokenUrl: https://xyzfinancial.unqork.io/api/1.0/oauth2/access_token
+        rfc: RFC 6749 §1.3.3
+        enabled_by_default: false
+        enablement: >-
+          Administration → Environment Administration → Unqork API →
+          "Enable OAuth2 Password Grant". Once enabled, every Unqork user can
+          exchange their platform username/password for an access token.
+        caveat: >-
+          The resource-owner password credentials grant is removed in OAuth 2.1
+          and discouraged by RFC 9700. Prefer clientCredentials.
+    token_lifetime_seconds: 3600
+    applied: >-
+      Globally — the document declares `security: [{OAuth2: []}]` at the root, so
+      all 93 operations require a bearer token. No operation names a scope.
+
+scopes:
+  - scope: none
+    description: N/A
+    placeholder: true
+    flows: [clientCredentials, password]
+    sources: [openapi/unqork-customer-api-openapi.yml]
+    note: >-
+      Declared in both flow `scopes` maps. It is a placeholder required by the
+      OpenAPI schema, not a grantable permission — requesting it confers nothing
+      and omitting it costs nothing.
+
+permission_model:
+  mechanism: Role-based access control (RBAC)
+  docs: https://docs.unqork.io/docs/api-access-management
+  surfaces:
+    - name: Express
+      credential_requires: At least one Express Role
+      role_admin: https://docs.unqork.io/docs/express-role-administration
+      permissions_reference: https://docs.unqork.io/docs/express-permissions
+      governs: End-user-facing resources — submissions, workflow execution
+    - name: Creator
+      credential_requires: At least one Creator Role
+      role_admin: https://docs.unqork.io/docs/creator-role-administration
+      permissions_reference: https://docs.unqork.io/docs/creator-permissions
+      governs: Design-time resources — modules, applications, promotions, credentials
+  per_operation_authorization: >-
+    Operation descriptions in the OpenAPI carry an "### Authorization Required:"
+    line naming the role needed (e.g. "Designer Administrator"). That prose is the
+    de-facto permission reference for the API — there is no machine-readable
+    permission map.
+  least_privilege: >-
+    Because there are no scopes, a token cannot be narrowed at request time.
+    Least privilege must be provisioned: create a credential bound to the
+    narrowest role that satisfies the job, one credential per integration.
+  credential_binding:
+    expiration_days: {min: 1, max: 730, ui_default: 90}
+    lockout: Five failed client-secret attempts lock the credential for 30 minutes
+    revocable: true (Creator credentials)
+    statuses: [ACTIVE, EXPIRES SOON, EXPIRED, REVOKED, LOCKED]
+
+discovery:
+  oauth_authorization_server_metadata: false
+  note: >-
+    No RFC 8414 /.well-known/oauth-authorization-server document is served on any
+    Unqork host, so the token endpoint and supported grants are discoverable only
+    from the OpenAPI securityScheme description and the docs.
+
+related:
+  authentication: authentication/unqork-authentication.yml
+  conventions: conventions/unqork-conventions.yml
+  well_known: well-known/unqork-well-known.yml

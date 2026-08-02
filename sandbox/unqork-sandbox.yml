@@ -1,0 +1,125 @@
+generated: '2026-07-31'
+method: searched
+source: >-
+  https://docs.unqork.io/docs/training-environment-usage-and-maintenance,
+  https://docs.unqork.io/docs/testing-api-endpoints-using-third-party-applications,
+  https://docs.unqork.io/docs/creating-api-tests,
+  https://docs.unqork.io/docs/how-to-build-mock-api-calls
+description: >-
+  Unqork has no "test mode" in the payments sense — there are no test key
+  prefixes, no magic test values and no test clocks. Instead it separates test
+  from live with WHOLE ENVIRONMENTS: every customer gets a tiered environment
+  ladder (Development → Staging → UAT → Production), each on its own subdomain
+  with its own API credentials and its own rate-limit setting, and configuration
+  moves between them through the Promotions API rather than through a mode flag.
+  On top of that, Unqork runs a public Training environment for Creators and
+  ships in-platform mock-API and API-test tooling.
+
+test_vs_live:
+  mechanism: separate environments (separate subdomains), not modes
+  environments: [Development, Staging, UAT, Production]
+  base_url_pattern: https://{subdomain}.unqork.io/api/1.0
+  key_prefixes: null
+  key_prefix_note: >-
+    Credentials are not prefixed by mode. API Access Management client IDs carry a
+    `uq` prefix in every environment (e.g. uq6478a3a52300ff7cf8ac55fc), so a
+    credential string alone does not tell you whether it points at production.
+  promotion:
+    description: >-
+      Configuration is promoted between environments through the Customer API's
+      Promotions surface.
+    discover_targets: getPromotionHosts (GET /promote/hosts)
+    operations: [promoteModule, promoteApplicationByItems, promoteDataCollection,
+      promoteStyle, promoteGroups, promoteRoles]
+
+training_environment:
+  url: https://training.unqork.io/
+  title: Unqork Training Environment
+  access_request: https://create-stagingx.unqork.io/#/display/5fbc1c6bad0e81021fece85c
+  purpose: >-
+    Public learning environment for Unqork Creators — training exercises,
+    platform exploration and premium training programs.
+  api_reachable: true
+  api_probe:
+    endpoint: GET https://training.unqork.io/api/1.0/users
+    observed_at: '2026-07-31'
+    http_status: 401
+    body: '{"code":401,"message":"Unauthorized"}'
+    x_ratelimit_limit: 100
+  workspaces:
+    - {name: Personal Workspace, use: Completing training exercises and practicing configuration, access: Edit}
+    - {name: Community Collaboration, use: Creating Community Hub examples to demonstrate issues, access: Edit}
+    - {name: Community Answers, use: Correct answers to Community Hub questions, access: View}
+    - {name: Community Resources, use: Use cases and Unqork event applications, access: View}
+    - {name: Enablement Labs, use: Reference material for Unqork Academy, access: View}
+    - {name: Creator Workshop Reference Materials, use: Step-by-step Creator Workshop and Novice program examples, access: View}
+  constraints:
+    - Data can be deleted at any time without notice; Creators must copy out anything they want to keep.
+    - Creators cannot create new workspaces in the Training environment.
+    - Proprietary data and PII must never be used in the environment.
+    - Workspaces, applications and modules not edited in 60 days are deleted.
+    - Creators who have not logged in for 60 days are deleted and lose access.
+    - Unused Community Collaborations answers and examples are deleted after 45 days.
+    - Proofs of concept and other real builds must be done in a separate environment.
+
+test_values:
+  published: false
+  note: >-
+    Unqork publishes no test card numbers, test bank accounts, magic identifiers
+    or hosted test tokens — the platform is not a payments or identity provider,
+    so there is nothing of that shape to publish. Any test data is whatever the
+    customer loads into their own non-production environment.
+
+time_simulation:
+  test_clocks: false
+  note: >-
+    No test-clock facility. The closest equivalent is workflow timer control:
+    `runTimerStartNodeOnce` (POST /workflows/{workflowPath}/timerstart/{timerStartNodePath}/run-once)
+    performs a one-off test run of a scheduled timer-start node without waiting
+    for its schedule, and `startTimerStartNode` / `stopTimerStartNode` toggle it.
+    `listTimedEventsBySubmissionId` inspects pending timed events for a submission.
+
+fixture_and_mock_tooling:
+  - name: Mock API calls
+    description: >-
+      Build a module that returns a canned response so downstream configuration
+      can be developed before the real integration exists.
+    docs: https://docs.unqork.io/docs/how-to-build-mock-api-calls
+  - name: API Tests
+    description: >-
+      In-platform test definitions for API module configurations, asserting
+      correct execution sequence and response.
+    docs: https://docs.unqork.io/docs/creating-api-tests
+  - name: API Docs Dashboard Tool
+    description: >-
+      Generates API documentation for the modules connected to every API and
+      remote execute, including request and response parameters.
+    docs: https://docs.unqork.io/docs/api-docs-dashboard-tool
+  - name: Logs Dashboard Tool
+    description: Identifies slow and error-prone API requests with filters, for troubleshooting.
+    docs: https://docs.unqork.io/docs/logs-dashboard-tool
+
+third_party_testing:
+  postman:
+    supported: true
+    method: >-
+      Import Unqork's OpenAPI description into Postman; it arrives as a
+      collection with all Unqork API calls organised in folders, with details,
+      examples and base URLs.
+    spec_url: https://developers.unqork.io/api/1.0/openapi.yml
+    docs: https://docs.unqork.io/docs/testing-api-endpoints-using-third-party-applications
+    official_workspace: null
+
+academy:
+  url: https://academy.unqork.com/
+  description: Unqork Academy — Creator training, workshops and certification programs.
+
+gaps:
+  - >-
+    No self-service sandbox. Getting an Unqork environment requires a commercial
+    relationship; the Training environment is for Creators learning the platform,
+    not for prospective API consumers evaluating the API.
+  - >-
+    No mode flag or key prefix means a credential cannot be distinguished from a
+    production credential by inspection — environment separation is by hostname
+    only.

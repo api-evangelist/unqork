@@ -1,0 +1,72 @@
+generated: '2026-07-31'
+method: searched
+probe: true
+url: https://trust.unqork.com/
+platform: Vanta Trust Center
+description: >-
+  Unqork runs a hosted Trust Center at trust.unqork.com (Vanta), and publishes a
+  human-readable security & compliance overview at unqork.com/security-compliance
+  plus a platform governance page at unqork.com/security-governance. The Trust
+  Center itself is a client-rendered single-page application, so the certification
+  list below was read from the public security-compliance page rather than from
+  the Vanta document index (which requires JS execution / a request for access).
+pages:
+  - url: https://trust.unqork.com/
+    title: unqork.com Trust Center
+    kind: trust-center
+    http_status: 200
+    rendering: client-side (Vanta SPA)
+  - url: https://unqork.com/security-compliance/
+    title: Security & Compliance
+    kind: compliance-overview
+    http_status: 200
+  - url: https://unqork.com/security-governance/
+    title: Security & Governance
+    kind: platform-governance
+    http_status: 200
+certifications:
+  - name: SOC 2 Type II
+    detail: >-
+      Unqork undergoes annual SOC 2 Type II examinations with AICPA-certified
+      third-party auditors; controls are tested to verify control effectiveness.
+  - name: ISO/IEC 27001:2013
+    detail: Unqork states it is ISO/IEC 27001:2013 certified.
+  - name: HIPAA
+    detail: >-
+      Listed as an industry-mandated standard Unqork maintains security
+      compliance with.
+  - name: FedRAMP
+    detail: >-
+      Unqork states it is live in the FedRAMP Marketplace; supporting controls
+      include FIPS-validated cryptography and PIV/CAC authentication for US
+      Government customers.
+  - name: GDPR
+    detail: >-
+      Unqork processes client data as a processor under the General Data
+      Protection Regulation.
+security_practices:
+  encryption: AES-256 at rest, FIPS-validated cryptography suites in transit and at rest
+  authentication: PIV/CAC authentication supported for US Government customers
+  penetration_testing: >-
+    Third-party penetration testing performed at least annually, plus
+    continuous automated scanning, static analysis and dynamic application
+    security testing prior to application go-live.
+  vulnerability_management: >-
+    Continuous platform-level monitoring with automated per-application
+    oversight including daily static scans.
+  audit_trail: >-
+    Platform-level change tracking of what changed, when, and by whom, across
+    the application lifecycle.
+related:
+  disclosure: security/unqork-vulnerability-disclosure.yml
+  domain_security: security/unqork-domain-security.yml
+  conformance: conformance/unqork-conformance.yml
+evidence:
+  - source: https://trust.unqork.com/
+    fetched: '2026-07-31'
+    http_status: 200
+    keywords: [trust center, security, compliance]
+  - source: https://unqork.com/security-compliance/
+    fetched: '2026-07-31'
+    http_status: 200
+    keywords: [soc 2 type ii, iso/iec 27001, hipaa, fedramp, gdpr, fips]

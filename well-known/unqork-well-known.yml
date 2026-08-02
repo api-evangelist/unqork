@@ -1,0 +1,68 @@
+generated: '2026-07-31'
+method: probed
+source: live GET probes of /.well-known/* on every Unqork host in apis.yml
+description: >-
+  No /.well-known/ discovery document was found on any Unqork host. Recorded so
+  a later round does not re-probe blindly, and so the gap is auditable.
+  IMPORTANT FALSE-POSITIVE NOTE: unqork.com (WordPress) answers HTTP 200 with
+  the marketing single-page shell for EVERY /.well-known/ path, including
+  /.well-known/agent-card.json. Those 200s are HTML, not documents — they are
+  recorded below as `html_catchall: true` and must never be treated as hits.
+found: 0
+hosts:
+  - host: unqork.com
+    verdict: html-catchall
+    note: >-
+      Every probed path returned 200 text/html (identical WordPress shell).
+      No real well-known document is served.
+    documents:
+      - {path: /.well-known/security.txt, status: 200, html_catchall: true}
+      - {path: /.well-known/openid-configuration, status: 200, html_catchall: true}
+      - {path: /.well-known/oauth-authorization-server, status: 200, html_catchall: true}
+      - {path: /.well-known/oauth-protected-resource, status: 200, html_catchall: true}
+      - {path: /.well-known/api-catalog, status: 200, html_catchall: true}
+      - {path: /.well-known/ai-plugin.json, status: 200, html_catchall: true}
+      - {path: /.well-known/agent-card.json, status: 200, html_catchall: true}
+      - {path: /.well-known/agent.json, status: 200, html_catchall: true}
+  - host: www.unqork.com
+    verdict: html-catchall
+    note: Same WordPress shell as the apex; all eight paths returned 200 text/html.
+  - host: docs.unqork.io
+    verdict: not-found
+    documents:
+      - {path: /.well-known/security.txt, status: 404}
+      - {path: /.well-known/openid-configuration, status: 404}
+      - {path: /.well-known/oauth-authorization-server, status: 404}
+      - {path: /.well-known/oauth-protected-resource, status: 404}
+      - {path: /.well-known/api-catalog, status: 404}
+      - {path: /.well-known/ai-plugin.json, status: 404}
+      - {path: /.well-known/agent-card.json, status: 404}
+      - {path: /.well-known/agent.json, status: 404}
+  - host: developers.unqork.io
+    verdict: forbidden
+    note: >-
+      Static S3-backed origin; every unknown key returns 403 AccessDenied
+      (application/xml). The OpenAPI itself is served from
+      /api/1.0/openapi.yml on this host.
+    documents:
+      - {path: /.well-known/security.txt, status: 403}
+      - {path: /.well-known/openid-configuration, status: 403}
+      - {path: /.well-known/oauth-authorization-server, status: 403}
+      - {path: /.well-known/agent-card.json, status: 403}
+      - {path: /.well-known/agent.json, status: 403}
+  - host: community.unqork.com
+    verdict: not-found
+    documents:
+      - {path: /.well-known/security.txt, status: 404}
+      - {path: /.well-known/agent-card.json, status: 404}
+      - {path: /.well-known/agent.json, status: 404}
+gaps:
+  - >-
+    No RFC 9116 security.txt, even though Unqork runs a real disclosure program
+    at unqork.com/security with psirt@unqork.com and a published PGP key.
+  - >-
+    No RFC 8414 /.well-known/oauth-authorization-server, even though the API is
+    OAuth 2.0 with clientCredentials and password grants. The token endpoint is
+    documented only in prose and in the OpenAPI securityScheme.
+  - No RFC 9727 /.well-known/api-catalog.
+  - No A2A agent card at either the canonical or legacy path.

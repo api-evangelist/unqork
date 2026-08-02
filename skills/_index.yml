@@ -1,0 +1,131 @@
+generated: '2026-07-31'
+method: generated
+source: >-
+  Generated from openapi/unqork-customer-api-openapi.yml plus the repo's
+  conventions/, errors/, rate-limits/, lifecycle/ and sandbox/ artifacts. Every
+  operationId referenced was verified verbatim against the specification. Unqork
+  publishes no AGENTS.md or first-party agent skills — searched docs.unqork.io,
+  the developer portal and the unqork-external GitHub organization.
+api: openapi/unqork-customer-api-openapi.yml
+provider: Unqork
+skills:
+  - file: unqork-authenticate-and-read-submissions.md
+    name: Authenticate to Unqork and read submission data
+    description: >-
+      Get an OAuth 2.0 bearer token from a tenant environment and read module or
+      workflow submissions, paging and filtering correctly. Foundation skill.
+    api: openapi/unqork-customer-api-openapi.yml
+    operations:
+      - getModuleSubmissions
+      - getModuleSubmission
+      - getAllSubmissions
+      - getWorkflowSubmissions
+      - getMergedSubmissions
+      - getModuleSubmissionRevisions
+  - file: unqork-create-and-execute-submission.md
+    name: Create, execute and correct an Unqork submission
+    description: >-
+      Write data into a module, execute it server-side, and handle the 412
+      validation envelope — including the duplicate-write risk created by the
+      absence of any idempotency contract.
+    api: openapi/unqork-customer-api-openapi.yml
+    operations:
+      - applicationsSubmissionDataModel
+      - createModuleSubmissions
+      - updateModuleSubmission
+      - updateModuleSubmissions
+      - executeModule
+      - getModuleSubmissions
+      - deleteModuleSubmission
+      - restoreDeletedModuleSubmission
+  - file: unqork-drive-a-workflow.md
+    name: Start, resume and schedule an Unqork workflow
+    description: >-
+      Start a workflow submission, resume a paused one, hand a module submission
+      into a workflow, and control the timer-start nodes that fire workflows on a
+      schedule.
+    api: openapi/unqork-customer-api-openapi.yml
+    operations:
+      - createWorkflowSubmission
+      - createWorkflowSubmissionFromStep
+      - resumeWorkflow
+      - handoffSubmission
+      - getWorkflowSubmissions
+      - getWorkflowSubmission
+      - updateWorkflowSubmission
+      - getWorkflowSubmissionRevisions
+      - listTimerStartNodes
+      - listTimedEventsBySubmissionId
+      - startTimerStartNode
+      - stopTimerStartNode
+      - runTimerStartNodeOnce
+      - restoreDeletedWorkflow
+  - file: unqork-promote-across-environments.md
+    name: Promote Unqork configuration across environments
+    description: >-
+      Move modules, application items, reference data, styles, groups and roles
+      from one environment to the next with dependency checks first. The
+      highest-consequence surface in the API — no rollback exists.
+    api: openapi/unqork-customer-api-openapi.yml
+    operations:
+      - getPromotionHosts
+      - applicationsDependencies
+      - applicationsDataModelsDependencies
+      - applicationModules
+      - applicationsUniqueName
+      - promoteModule
+      - promoteApplicationByItems
+      - promoteDataCollection
+      - promoteStyle
+      - promoteGroups
+      - promoteRoles
+      - promoteGlobalVariables
+      - listAuditLogs
+  - file: unqork-manage-api-credentials-and-access.md
+    name: Manage Unqork API credentials, users and access
+    description: >-
+      Mint, rotate and revoke API credentials, manage Express users and groups,
+      and read the audit trail. Every operation is privileged and should stay
+      behind human approval.
+    api: openapi/unqork-customer-api-openapi.yml
+    operations:
+      - credentialsGetAll
+      - credentialsCreate
+      - credentialsUpdate
+      - credentialsRevoke
+      - credentialsDeleteById
+      - getUsers
+      - getUser
+      - createUser
+      - updateUser
+      - deleteUser
+      - getUserPasswordStatus
+      - getGroups
+      - getGroup
+      - createGroup
+      - updateGroup
+      - deleteGroup
+      - listAuditLogs
+      - generateReferString
+coverage:
+  skills: 5
+  operations_referenced: 57
+  operations_total: 93
+cross_cutting_rules:
+  - >-
+    No idempotency anywhere in the API — no Idempotency-Key, no If-Match, no
+    ETag. Never blind-retry a write; correlate on submission metadata and read
+    back first.
+  - >-
+    No OAuth scopes. Least privilege is a provisioning decision — create a
+    credential bound to a narrow Express or Creator role.
+  - >-
+    Errors are {code, message} on application/json, not RFC 9457. 412 carries the
+    structured validation/execution envelope and is the code to branch on.
+  - >-
+    Rate limits are per source IP per server per 60 seconds and are tuned by the
+    customer's administrator (default 1000, documented minimum 100). Read
+    x-ratelimit-remaining; there is no Retry-After.
+  - >-
+    Base URLs are per tenant and per environment. Credentials and tokens do not
+    cross environments.

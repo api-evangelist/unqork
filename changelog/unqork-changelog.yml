@@ -1,0 +1,98 @@
+generated: '2026-07-31'
+method: searched
+source: >-
+  https://docs.unqork.io/docs/unqork-release-notes and
+  https://docs.unqork.io/docs/2026-release-calendar
+url: https://docs.unqork.io/docs/unqork-release-notes
+description: >-
+  Unqork publishes dated platform release notes in its Documentation Hub, one
+  page per minor release plus a page per patch, alongside a forward-looking
+  release calendar. Product announcements are additionally posted to the Creator
+  Community's Updates channel. There is no separate API changelog — the REST
+  surface at /api/1.0 is not independently versioned, so API-affecting changes
+  arrive inside platform releases.
+
+scheme: major.minor for GA releases, major.minor.patch.build for patches
+current_version: '8.2'
+next_version: '9.0'
+cadence:
+  ga: quarterly (12-week cycle), promoted Staging → UAT → Production
+  patch: weekly on Tuesdays, as needed for critical fixes
+  notes_lead_time: published one week before the release reaches Staging
+
+channels:
+  - kind: release-notes
+    url: https://docs.unqork.io/docs/unqork-release-notes
+    label: Unqork Release Notes/Calendar
+  - kind: release-calendar
+    url: https://docs.unqork.io/docs/2026-release-calendar
+    label: 2026 Release Calendar
+  - kind: product-updates
+    url: https://community.unqork.com/product-updates
+    label: Unqork Community — Updates
+  - kind: newsroom
+    url: https://unqork.com/newsroom/
+    label: Unqork Newsroom
+
+entries:
+  - version: '9.0'
+    date: '2026-10-13'
+    stage: Production GA (Staging 2026-09-15, UAT 2026-09-29)
+    breaking: unknown
+    highlights:
+      - >-
+        UnqorkAI release. Renamed from 8.4 "to better match the significant
+        scale, capabilities, and value coming with the launch of UnqorkAI".
+      - >-
+        Announced via Community product-updates and the newsroom post
+        "UnqorkAI Ends the Chaos of Enterprise AI Code Sprawl".
+    docs: https://community.unqork.com/product-updates/new-platform-release-for-unqorkai-version-9-0-18642
+  - version: '8.2'
+    date: '2026-06-09'
+    stage: Production GA (Staging 2026-05-05, UAT 2026-05-19)
+    breaking: unknown
+    highlights:
+      - Second quarterly GA of the new 12-week cadence.
+      - Production date shifted to accommodate the annual Unqork Create conference.
+    docs: https://docs.unqork.io/docs/8-2-x-release-notes
+    patches:
+      - '8.2.7.0'
+      - '8.2.5.0'
+      - '8.2.3.0'
+      - '8.2.2.0'
+      - '8.2.1.0'
+  - version: '8.0'
+    date: '2026-03-10'
+    stage: Production GA (Staging 2026-02-10, UAT 2026-02-24)
+    breaking: unknown
+    highlights:
+      - >-
+        First release on the new quarterly (12-week) GA cadence, replacing the
+        previous 6-week cohort schedule.
+    docs: https://docs.unqork.io/docs/80x-release-notes
+    patches:
+      - '8.0.8.0'
+      - '8.0.7.0'
+      - '8.0.6.0'
+      - '8.0.5.0'
+      - '8.0.4.0'
+      - '8.0.3.1'
+      - '8.0.2.0'
+      - '8.0.1.0'
+      - '8.0.0.5'
+
+history_note: >-
+  Release-note pages are retained back through the 7.x line (7.20.0–7.30.0,
+  7.28.x, 7.26.x and earlier), each with its own patch series. Only the current
+  window is captured here; the Documentation Hub is the source of truth.
+
+gaps:
+  - >-
+    Release notes are not machine-readable — no feed, no JSON, one HTML page per
+    release.
+  - >-
+    Entries are not labelled breaking vs additive at the changelog level, so a
+    consumer cannot tell from the index whether a release affects the API.
+  - >-
+    No API-specific changelog. Because the REST path is frozen at /api/1.0, an
+    API consumer has to read platform release notes to find contract changes.
