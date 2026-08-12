@@ -76,6 +76,8 @@ maintainers:
 - FN: APIs.json
   email: info@apis.io
 common:
+- type: MCPServer
+  url: mcp/unqork-mcp.yml
 - type: AgenticAccess
   url: agentic-access/unqork-agentic-access.yml
 - type: DomainSecurity
