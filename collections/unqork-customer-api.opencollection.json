@@ -1,0 +1,2728 @@
+{
+  "opencollection": "1.0.0",
+  "info": {
+    "name": "Unqork Customer API",
+    "version": "1.0.0"
+  },
+  "request": {
+    "auth": {
+      "type": "oauth2",
+      "flow": "client_credentials",
+      "accessTokenUrl": "https://xyzfinancial.unqork.io/api/1.0/oauth2/access_token",
+      "credentials": {
+        "clientId": "{{clientId}}",
+        "clientSecret": "{{clientSecret}}"
+      }
+    }
+  },
+  "items": [
+    {
+      "info": {
+        "name": "Authentication",
+        "type": "folder"
+      },
+      "items": [
+        {
+          "info": {
+            "name": "Generates an encrypted referstring for authentication",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://{host}/api/1.0/referstring",
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "This endpoint will generate encrypted refer strings that can be used to authenticate users into an Unqork environment\n\n Environment Variables - The following Environment Variables are required\n - key : key for encryption\n - cipher : method of encryption. The default and recommended cipher is aes-256-gcm.\n\n Include this refer string in the link to an Unqork resource as follows\n   ```\n   <hostname>?refer=<referString>/#/display/<resource_id>\n   ```\n   - hostname - host name of Unqork server\n   - r"
+        }
+      ]
+    },
+    {
+      "info": {
+        "name": "Submissions",
+        "type": "folder"
+      },
+      "items": [
+        {
+          "info": {
+            "name": "Get Module Submissions",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://{host}/api/1.0/modules/:moduleId/submissions",
+            "params": [
+              {
+                "name": "moduleId",
+                "value": "",
+                "type": "path",
+                "description": "Unique module ID"
+              },
+              {
+                "name": "transformName",
+                "value": "",
+                "type": "query",
+                "description": "Transform to apply to module for output. Transform must be configured and designated for for output. Available transforms may be listed via the /transforms endpoint"
+              },
+              {
+                "name": "limit",
+                "value": "",
+                "type": "query",
+                "description": "Maximum number of results to return (default 50, maximum 50)"
+              },
+              {
+                "name": "offset",
+                "value": "",
+                "type": "query",
+                "description": "Number of results to skip before selecting results. Offset is zero based."
+              },
+              {
+                "name": "sortBy",
+                "value": "",
+                "type": "query",
+                "description": "Field to sort by (currently supported - `\"created\"`, `\"modified\"`)"
+              },
+              {
+                "name": "sortOrder",
+                "value": "",
+                "type": "query",
+                "description": "Order of sort, if `sortBy` is specified.  One of [`1` (ascending),`-1` (descending)]"
+              },
+              {
+                "name": "includeDeleted",
+                "value": "",
+                "type": "query",
+                "description": "Whether to include deleted objects in response"
+              },
+              {
+                "name": "metadataFilter",
+                "value": "",
+                "type": "query",
+                "description": "Filter condition against submission \"metadata\" field. Value must be a stringified MongoDB query condition (see Examples, below). MongoDB [dot notation](https://docs.mongodb.com/manual/core/document/#dot-notation) is supported for keys.\n\nNOTE: MongoDB selectors that can be nested inside queries (such as [Comparison](https://docs.mongodb.com/manual/reference/operator/query/#comparison) and [Element](https://docs.mongodb.com/manual/reference/operator/query/#element) Selectors, e.g. `$eq`, `$in`, `$exists`) are supported. The following [Logical](https://docs.mongodb.com/manual/reference/operator/query/#logical) Selectors are also supported: `$and`, `$or`, `$nor`\n\nExamples:\n- `metadataFilter: {\"checkpoints.complete\": 1234}`\n- `metadataFilter: {\"checkpoints.complete\": {\"$exists\": true}, \"checkpoints.processed\": {\"$exists\": false}}`\n\n  - Will return submissions where both `metadata.checkpoints.complete` exists AND `metadata.checkpoints.processed` does not exist\n"
+              },
+              {
+                "name": "includeRaw",
+                "value": "",
+                "type": "query",
+                "description": "Whether to include the untransformed raw submission data in addition to the transformed data. Raw submission data may contain [Cloud Storage Delivery URLs](#section/Cloud-Storage-Delivery)."
+              },
+              {
+                "name": "includeBase64",
+                "value": "",
+                "type": "query",
+                "description": "Whether to include base64 PDF data in addition to the PDF url (for \"njk-pdf\" transforms)"
+              },
+              {
+                "name": "resolveCloudStorageUrls",
+                "value": "",
+                "type": "query",
+                "description": "When `transformName` is specified, Cloud Storage URLs are already resolved to the original base64 value. When this flag is specified, resolve Cloud Storage URLs to base64 data inside \"rawData\", as well."
+              },
+              {
+                "name": "dataFields",
+                "value": "",
+                "type": "query",
+                "description": "Comma-separated list of dot-notation `data` fields to retrieve; for example, `&dataFields=field1,also.field2` will retrieve `{\"data\":{\"field1\":\"v1\",\"also\":{\"field2\":\"v2\"}}}`. Do not include \"data\" in front of each field. All other submission fields will always be retrieved.\n"
+              },
+              {
+                "name": "filter",
+                "value": "",
+                "type": "query",
+                "description": "Filter conditions against submissions. Currently supported filter conditions are `userId`, `created`, and `modified`. The filters should be `;` separated, as shown below. NOTE: When filtering on `created` and `modified`, all timestamps are in UTC.\n\nExamples:\n  - `filter=userId=john@doe.com` will fetch all submissions owned by \"john@doe.com\"\n  - `filter=userId=john@doe.com;created>2019-06-11T21:50:57.067Z` will fetch all submissions owned by \"john@doe.com\" and created after \"2019-06-11T21:50:57.067Z\" (UTC)\n  - `filter=modified=2019-06-11T21:50:57.067Z` will fetch submissions modified at exactly \"2019-06-11T21:50:57.067Z\" (UTC)\n  - `filter=created>2019-06-11T00:00:00.000Z;created<2019-06-20T00:00:00.000Z` will fetch submissions created between \"2019-06-11T00:00:00.000Z\" (UTC) and \"2019-06-20T00:00:00.000Z\" (UTC)\n\n\nSupported operators (as specified in this library [api-query-params](https://github.com/loris/api-query-params)):\n  - key=val  `type=public`\n  - key>val  `count>5`\n  - key>=val  `rating>=9.5`\n  - key<val  `createdAt<2016-01-01`\n  - key<=val  `score<=-5`\n  - key!=val  `status!=success`\n  - key=val1,val2  `country=GB,US`\n  - key!=val1,val2  `lang!=fr,en`\n  - key  `phone`\n  - !key  `!email`\n  - key=/value/<opts>  `email=/@gmail\\.com$/i`\n  - key!=/value/<opts> `phone!=/^06/`\n\nNote: multiple forward slashes (/) are interpreted as a regex. To use a string comparison wrap your parameter with string(). Ex. email=string(/@gmail\\.com$/i).\n"
+              }
+            ]
+          },
+          "docs": "Returns module submission objects for a given module. This is a paged endpoint (see Paging). Module submission data is transformed and returned in a specific format, based on the specified transform. JSON submission data is returned as an object, XML data is returned as a string, and PDF data is returned as a [Cloud Storage Delivery URL](#section/Cloud-Storage-Delivery) to the rendered PDF (and optionally base 64 data).\n### Authorization Required:\n  - See Submission Access ([Submission Access](#"
+        },
+        {
+          "info": {
+            "name": "Create Module Submission(s)",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://{host}/api/1.0/modules/:moduleId/submissions",
+            "params": [
+              {
+                "name": "moduleId",
+                "value": "",
+                "type": "path",
+                "description": "Unique module ID"
+              },
+              {
+                "name": "transformName",
+                "value": "",
+                "type": "query",
+                "description": "Transform to apply to module for input. Transform must be configured and designated for for input. Available transform types may be listed via the /transforms endpoint."
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Creates one or more new module submission. Submission ID is auto-generated and returned. Module submission data must be provided as a JSON object. In case of multiple submissions, Request Body must contain an Array of below defined request body structure. Max Limit per request is 50.\n### Authorization Required:\n  - See Submission Access ([Submission Access](#submission-access))\n"
+        },
+        {
+          "info": {
+            "name": "Update Multiple Module Submissions",
+            "type": "http"
+          },
+          "http": {
+            "method": "PUT",
+            "url": "https://{host}/api/1.0/modules/:moduleId/submissions",
+            "params": [
+              {
+                "name": "moduleId",
+                "value": "",
+                "type": "path",
+                "description": "Unique module ID"
+              },
+              {
+                "name": "replaceData",
+                "value": "",
+                "type": "query",
+                "description": "Whether to completely replace the submission data with the object passed in \"data\". This option is available to \"Administrator\" users only."
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Updates multiple module submissions. This operation supports partial \"data\" updates, i.e. data that is sent in \"data\" may include some but not all of the submission data. Partial metadata updates are supported without including the entire metadata object. To increment a numeric data key (will also initialize), use \"incrementData\" To delete a data key, use \"unsetData\". To delete a metadata key, use \"unsetMetadata\". To replace the entire data object, use the \"replaceData\" flag. Module submission d"
+        },
+        {
+          "info": {
+            "name": "Deletes Multiple Module Submissions",
+            "type": "http"
+          },
+          "http": {
+            "method": "DELETE",
+            "url": "https://{host}/api/1.0/modules/:moduleId/submissions",
+            "params": [
+              {
+                "name": "moduleId",
+                "value": "",
+                "type": "path",
+                "description": "Unique module ID"
+              },
+              {
+                "name": "destroy",
+                "value": "",
+                "type": "query",
+                "description": "Whether to hard delete the submission from database. Value of 'destroy=true' will delete the submission. This option requires administrator privileges. Once deleted, the submission cannot be retrieved."
+              },
+              {
+                "name": "ids",
+                "value": "",
+                "type": "query",
+                "description": "A comma seperated list of the ids required to be deleted. Note - Max limit is 50 Per Request Example - ?ids=id1,id2,id3....\n"
+              }
+            ]
+          },
+          "docs": "Deletes multiple module submission based on the ID supplied. Note that module submissions are soft-deleted (marked deleted, but not removed). Default Max Limit per request is 50\n### Authorization Required:\n  - See Submission Access ([Submission Access](#submission-access))\n"
+        },
+        {
+          "info": {
+            "name": "Get Module Submission",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://{host}/api/1.0/modules/:moduleId/submissions/:submissionId",
+            "params": [
+              {
+                "name": "moduleId",
+                "value": "",
+                "type": "path",
+                "description": "Unique module ID"
+              },
+              {
+                "name": "submissionId",
+                "value": "",
+                "type": "path",
+                "description": "ID of module submission to retrieve"
+              },
+              {
+                "name": "transformName",
+                "value": "",
+                "type": "query",
+                "description": "Transform to apply to module for output. Transform must be configured and designated for for output. Available transforms may be listed via the /transforms endpoint"
+              },
+              {
+                "name": "includeRaw",
+                "value": "",
+                "type": "query",
+                "description": "Whether to include the untransformed raw submission data in addition to the transformed data. Raw submission data may contain [Cloud Storage Delivery URLs](#section/Cloud-Storage-Delivery)."
+              },
+              {
+                "name": "includeBase64",
+                "value": "",
+                "type": "query",
+                "description": "Whether to include base64 PDF data in addition to the PDF url (for \"njk-pdf\" transforms)"
+              },
+              {
+                "name": "resolveCloudStorageUrls",
+                "value": "",
+                "type": "query",
+                "description": "When `transformName` is specified, Cloud Storage URLs are already resolved to the original base64 value. When this flag is specified, resolve Cloud Storage URLs to base64 data inside \"rawData\", as well."
+              },
+              {
+                "name": "dataFields",
+                "value": "",
+                "type": "query",
+                "description": "Comma-separated list of dot-notation `data` fields to retrieve; for example, `&dataFields=field1,also.field2` will retrieve `{\"data\":{\"field1\":\"v1\",\"also\":{\"field2\":\"v2\"}}}`. Do not include \"data\" in front of each field. All other submission fields will always be retrieved.\n"
+              }
+            ]
+          },
+          "docs": "Gets a single module submission. Module submission data is transformed and returned is a specific format, based on the specified transform. JSON submission data is returned as an object, XML data is returned as a string, and PDF data is returned as a [Cloud Storage Delivery URL](#section/Cloud-Storage-Delivery) to the rendered PDF (and optionally base 64 data).\n### Authorization Required:\n  - See Submission Access ([Submission Access](#submission-access))\n"
+        },
+        {
+          "info": {
+            "name": "Update Module Submission",
+            "type": "http"
+          },
+          "http": {
+            "method": "PUT",
+            "url": "https://{host}/api/1.0/modules/:moduleId/submissions/:submissionId",
+            "params": [
+              {
+                "name": "moduleId",
+                "value": "",
+                "type": "path",
+                "description": "Unique module ID"
+              },
+              {
+                "name": "submissionId",
+                "value": "",
+                "type": "path",
+                "description": "ID of module submission to update"
+              },
+              {
+                "name": "transformName",
+                "value": "",
+                "type": "query",
+                "description": "Transform to apply to module for input. Transform must be configured and designated for for input. Available transform types may be listed via the /transforms endpoint."
+              },
+              {
+                "name": "replaceData",
+                "value": "",
+                "type": "query",
+                "description": "Whether to completely replace the submission data with the object passed in \"data\". This option is available to \"Administrator\" users only."
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Updates a single module submission. This operation supports partial \"data\" updates, i.e. data that is sent in \"data\" may include some but not all of the submission data. Partial metadata updates are supported without including the entire metadata object. To increment a numeric data key (will also initialize), use \"incrementData\" To delete a data key, use \"unsetData\". To delete a metadata key, use \"unsetMetadata\". Module submission data must be provided as a JSON object.\n### Authorization Require"
+        },
+        {
+          "info": {
+            "name": "Delete Module Submission",
+            "type": "http"
+          },
+          "http": {
+            "method": "DELETE",
+            "url": "https://{host}/api/1.0/modules/:moduleId/submissions/:submissionId",
+            "params": [
+              {
+                "name": "moduleId",
+                "value": "",
+                "type": "path",
+                "description": "Unique module ID"
+              },
+              {
+                "name": "submissionId",
+                "value": "",
+                "type": "path",
+                "description": "ID of module submission to delete"
+              },
+              {
+                "name": "destroy",
+                "value": "",
+                "type": "query",
+                "description": "Whether to hard delete the submission from database. Value of 'destroy=true' will delete the submission. This option requires administrator privileges. Once deleted, the submission cannot be retrieved back."
+              }
+            ]
+          },
+          "docs": "Deletes a single module submission based on the ID supplied. Note that module submissions are soft-deleted (marked deleted, but not removed).\n### Authorization Required:\n  - See Submission Access ([Submission Access](#submission-access))\n"
+        },
+        {
+          "info": {
+            "name": "Restore a Deleted Module Submission",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://{host}/api/1.0/modules/:moduleId/submissions/:submissionId/restore",
+            "params": [
+              {
+                "name": "moduleId",
+                "value": "",
+                "type": "path",
+                "description": "Unique module ID"
+              },
+              {
+                "name": "submissionId",
+                "value": "",
+                "type": "path",
+                "description": "ID of module submission to restore"
+              }
+            ]
+          },
+          "docs": "Restore a soft-deleted submission.\n### Authorization Required:\n  - See Submission Access ([Submission Access](#submission-access))\n"
+        },
+        {
+          "info": {
+            "name": "Restore a Deleted Workflow Submission",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://{host}/api/1.0/workflows/:workflowId/submissions/:submissionId/restore",
+            "params": [
+              {
+                "name": "workflowId",
+                "value": "",
+                "type": "path",
+                "description": "Unique workflow ID"
+              },
+              {
+                "name": "submissionId",
+                "value": "",
+                "type": "path",
+                "description": "ID of workflow submission to restore"
+              }
+            ]
+          },
+          "docs": "Restore a soft-deleted submission.\n### Authorization Required:\n  - See Submission Access ([Submission Access](#submission-access))\n"
+        },
+        {
+          "info": {
+            "name": "Get Submissions Across Modules and Workflows",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://{host}/api/1.0/submissions",
+            "params": [
+              {
+                "name": "limit",
+                "value": "",
+                "type": "query",
+                "description": "Maximum number of results to return (default 50, maximum 50)"
+              },
+              {
+                "name": "offset",
+                "value": "",
+                "type": "query",
+                "description": "Number of results to skip before selecting results. Offset is zero based."
+              },
+              {
+                "name": "sortBy",
+                "value": "",
+                "type": "query",
+                "description": "Field to sort by (currently supported - `\"created\"`, `\"modified\"`)"
+              },
+              {
+                "name": "sortOrder",
+                "value": "",
+                "type": "query",
+                "description": "Order of sort, if `sortBy` is specified.  One of [`1` (ascending),`-1` (descending)]"
+              },
+              {
+                "name": "includeDeleted",
+                "value": "",
+                "type": "query",
+                "description": "Whether to include deleted objects in response"
+              },
+              {
+                "name": "metadataFilter",
+                "value": "",
+                "type": "query",
+                "description": "Filter condition against submission \"metadata\" field. Value must be a stringified MongoDB query condition (see Examples, below). MongoDB [dot notation](https://docs.mongodb.com/manual/core/document/#dot-notation) is supported for keys.\n\nNOTE: MongoDB selectors that can be nested inside queries (such as [Comparison](https://docs.mongodb.com/manual/reference/operator/query/#comparison) and [Element](https://docs.mongodb.com/manual/reference/operator/query/#element) Selectors, e.g. `$eq`, `$in`, `$exists`) are supported. The following [Logical](https://docs.mongodb.com/manual/reference/operator/query/#logical) Selectors are also supported: `$and`, `$or`, `$nor`\n\nExamples:\n- `metadataFilter: {\"checkpoints.complete\": 1234}`\n- `metadataFilter: {\"checkpoints.complete\": {\"$exists\": true}, \"checkpoints.processed\": {\"$exists\": false}}`\n\n  - Will return submissions where both `metadata.checkpoints.complete` exists AND `metadata.checkpoints.processed` does not exist\n"
+              },
+              {
+                "name": "dataFields",
+                "value": "",
+                "type": "query",
+                "description": "Comma-separated list of dot-notation `data` fields to retrieve; for example, `&dataFields=field1,also.field2` will retrieve `{\"data\":{\"field1\":\"v1\",\"also\":{\"field2\":\"v2\"}}}`. Do not include \"data\" in front of each field. All other submission fields will always be retrieved.\n"
+              }
+            ]
+          },
+          "docs": "Returns submission objects across all modules and workflows. This is a paged endpoint (see Paging). This endpoint is available to \"Administrator\" users only.\n### Authorization Required:\n  - See Submission Access ([Submission Access](#submission-access))\n"
+        },
+        {
+          "info": {
+            "name": "Get Merged Submissions",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://{host}/api/1.0/submissions/merge/:submissionIds",
+            "params": [
+              {
+                "name": "submissionIds",
+                "value": "",
+                "type": "path",
+                "description": "A comma separated list of submission ids to merge."
+              },
+              {
+                "name": "conflictCheckFields",
+                "value": "",
+                "type": "query",
+                "description": "A comma separated list of fields to report conflicts on."
+              },
+              {
+                "name": "reportConflicts",
+                "value": "",
+                "type": "query",
+                "description": "If `reportConflicts` is specified, an array called 'conflicts' will be appended at the top level of the object."
+              },
+              {
+                "name": "sortBy",
+                "value": "",
+                "type": "query",
+                "description": "A comma separated list of fields to sort by."
+              },
+              {
+                "name": "sortOrder",
+                "value": "",
+                "type": "query",
+                "description": "A comma separated list of sort orders. If `sortOrder` is unspecified, all values are sorted in ascending order. Otherwise, specify an order of \"desc\" for descending or \"asc\" for ascending sort order of corresponding values."
+              }
+            ]
+          },
+          "docs": "Submission super access is required. This endpoint returns the merged submission object across provided submission ids. The submissions are merged in the order specified by sortOrder and sortBy. If not specified, the submission objects are applied from left to right. Subsequent submission overwrite property assignment of previous sources.\n### Authorization Required:\n  - See Submission Access ([Submission Access](#submission-access))\n"
+        },
+        {
+          "info": {
+            "name": "Get Workflow Submissions",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://{host}/api/1.0/workflows/:workflowId/submissions",
+            "params": [
+              {
+                "name": "workflowId",
+                "value": "",
+                "type": "path",
+                "description": "Unique workflow ID"
+              },
+              {
+                "name": "transformName",
+                "value": "",
+                "type": "query",
+                "description": "Transform to apply to form for output. Transform must be configured and designated for for output. Available transforms may be listed via the /transforms endpoint"
+              },
+              {
+                "name": "limit",
+                "value": "",
+                "type": "query",
+                "description": "Maximum number of results to return (default 50, maximum 50)"
+              },
+              {
+                "name": "offset",
+                "value": "",
+                "type": "query",
+                "description": "Number of results to skip before selecting results. Offset is zero based."
+              },
+              {
+                "name": "sortBy",
+                "value": "",
+                "type": "query",
+                "description": "Field to sort by (currently supported - `\"created\"`, `\"modified\"`)"
+              },
+              {
+                "name": "sortOrder",
+                "value": "",
+                "type": "query",
+                "description": "Order of sort, if `sortBy` is specified.  One of [`1` (ascending),`-1` (descending)]"
+              },
+              {
+                "name": "includeDeleted",
+                "value": "",
+                "type": "query",
+                "description": "Whether to include deleted objects in response"
+              },
+              {
+                "name": "metadataFilter",
+                "value": "",
+                "type": "query",
+                "description": "Filter condition against submission \"metadata\" field. Value must be a stringified MongoDB query condition (see Examples, below). MongoDB [dot notation](https://docs.mongodb.com/manual/core/document/#dot-notation) is supported for keys.\n\nNOTE: MongoDB selectors that can be nested inside queries (such as [Comparison](https://docs.mongodb.com/manual/reference/operator/query/#comparison) and [Element](https://docs.mongodb.com/manual/reference/operator/query/#element) Selectors, e.g. `$eq`, `$in`, `$exists`) are supported. The following [Logical](https://docs.mongodb.com/manual/reference/operator/query/#logical) Selectors are also supported: `$and`, `$or`, `$nor`\n\nExamples:\n- `metadataFilter: {\"checkpoints.complete\": 1234}`\n- `metadataFilter: {\"checkpoints.complete\": {\"$exists\": true}, \"checkpoints.processed\": {\"$exists\": false}}`\n\n  - Will return submissions where both `metadata.checkpoints.complete` exists AND `metadata.checkpoints.processed` does not exist\n"
+              },
+              {
+                "name": "includeRaw",
+                "value": "",
+                "type": "query",
+                "description": "Whether to include the untransformed raw submission data in addition to the transformed data. Raw submission data may contain [Cloud Storage Delivery URLs](#section/Cloud-Storage-Delivery)."
+              },
+              {
+                "name": "includeBase64",
+                "value": "",
+                "type": "query",
+                "description": "Whether to include base64 PDF data in addition to the PDF url (for \"njk-pdf\" transforms)"
+              },
+              {
+                "name": "resolveCloudStorageUrls",
+                "value": "",
+                "type": "query",
+                "description": "When `transformName` is specified, Cloud Storage URLs are already resolved to the original base64 value. When this flag is specified, resolve Cloud Storage URLs to base64 data inside \"rawData\", as well."
+              },
+              {
+                "name": "dataFields",
+                "value": "",
+                "type": "query",
+                "description": "Comma-separated list of dot-notation `data` fields to retrieve; for example, `&dataFields=field1,also.field2` will retrieve `{\"data\":{\"field1\":\"v1\",\"also\":{\"field2\":\"v2\"}}}`. Do not include \"data\" in front of each field. All other submission fields will always be retrieved.\n"
+              },
+              {
+                "name": "filter",
+                "value": "",
+                "type": "query",
+                "description": "Filter conditions against submissions. Currently supported filter conditions are `userId`, `created`, and `modified`. The filters should be `;` separated, as shown below. NOTE: When filtering on `created` and `modified`, all timestamps are in UTC.\n\nExamples:\n  - `filter=userId=john@doe.com` will fetch all submissions owned by \"john@doe.com\"\n  - `filter=userId=john@doe.com;created>2019-06-11T21:50:57.067Z` will fetch all submissions owned by \"john@doe.com\" and created after \"2019-06-11T21:50:57.067Z\" (UTC)\n  - `filter=modified=2019-06-11T21:50:57.067Z` will fetch submissions modified at exactly \"2019-06-11T21:50:57.067Z\" (UTC)\n  - `filter=created>2019-06-11T00:00:00.000Z;created<2019-06-20T00:00:00.000Z` will fetch submissions created between \"2019-06-11T00:00:00.000Z\" (UTC) and \"2019-06-20T00:00:00.000Z\" (UTC)\n\n\nSupported operators (as specified in this library [api-query-params](https://github.com/loris/api-query-params)):\n  - key=val  `type=public`\n  - key>val  `count>5`\n  - key>=val  `rating>=9.5`\n  - key<val  `createdAt<2016-01-01`\n  - key<=val  `score<=-5`\n  - key!=val  `status!=success`\n  - key=val1,val2  `country=GB,US`\n  - key!=val1,val2  `lang!=fr,en`\n  - key  `phone`\n  - !key  `!email`\n  - key=/value/<opts>  `email=/@gmail\\.com$/i`\n  - key!=/value/<opts> `phone!=/^06/`\n\nNote: multiple forward slashes (/) are interpreted as a regex. To use a string comparison wrap your parameter with string(). Ex. email=string(/@gmail\\.com$/i).\n"
+              }
+            ]
+          },
+          "docs": "Returns workflow submission objects for a given workflow. This is a paged endpoint (see Paging). Workflow submission data is transformed and returned in a specific format, based on the specified transform. JSON submission data is returned as an object, XML data is returned as a string, and PDF data is returned as a [Cloud Storage Delivery URL](#section/Cloud-Storage-Delivery) to the rendered PDF (and optionally base 64 data).\n### Authorization Required:\n  - See Submission Access ([Submission Acc"
+        },
+        {
+          "info": {
+            "name": "Deletes Multiple Workflow Submissions",
+            "type": "http"
+          },
+          "http": {
+            "method": "DELETE",
+            "url": "https://{host}/api/1.0/workflows/:workflowId/submissions",
+            "params": [
+              {
+                "name": "workflowId",
+                "value": "",
+                "type": "path",
+                "description": "Unique workflow ID"
+              },
+              {
+                "name": "destroy",
+                "value": "",
+                "type": "query",
+                "description": "Whether to hard delete the submission(s) from database. Value of 'destroy=true' will delete the submission(s). This option requires administrator privileges. Once deleted, the submission(s) cannot be retrieved."
+              },
+              {
+                "name": "ids",
+                "value": "",
+                "type": "query",
+                "description": "A comma separated list of the ID(s) to be deleted. Note - Max limit is 50 Per Request Example - ?ids=id1,id2,id3....\n"
+              }
+            ]
+          },
+          "docs": "Deletes multiple workflow submissions based on the ID(s) supplied. Note that workflow submissions are soft-deleted (marked deleted, but not removed). Default Max Limit per request is 50\n### Authorization Required:\n  - See Submission Access ([Submission Access](#submission-access))\n"
+        },
+        {
+          "info": {
+            "name": "Get Workflow Submission",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://{host}/api/1.0/workflows/:workflowId/submissions/:submissionId",
+            "params": [
+              {
+                "name": "workflowId",
+                "value": "",
+                "type": "path",
+                "description": "Unique workflow ID"
+              },
+              {
+                "name": "submissionId",
+                "value": "",
+                "type": "path",
+                "description": "ID of workflow submission to retrieve"
+              },
+              {
+                "name": "transformName",
+                "value": "",
+                "type": "query",
+                "description": "Transform to apply to workflow for output. Transform must be configured and designated for for output. Available transforms may be listed via the /transforms endpoint"
+              },
+              {
+                "name": "includeRaw",
+                "value": "",
+                "type": "query",
+                "description": "Whether to include the untransformed raw submission data in addition to the transformed data. Raw submission data may contain [Cloud Storage Delivery URLs](#section/Cloud-Storage-Delivery)."
+              },
+              {
+                "name": "includeBase64",
+                "value": "",
+                "type": "query",
+                "description": "Whether to include base64 PDF data in addition to the PDF url (for \"njk-pdf\" transforms)"
+              },
+              {
+                "name": "resolveCloudStorageUrls",
+                "value": "",
+                "type": "query",
+                "description": "When transformName is specified, Cloud Storage URLs are already resolved to the original base64 value. When this flag is specified, resolve Cloud Storage URLs to base64 data inside \"rawData\", as well."
+              },
+              {
+                "name": "dataFields",
+                "value": "",
+                "type": "query",
+                "description": "Comma-separated list of dot-notation `data` fields to retrieve; for example, `&dataFields=field1,also.field2` will retrieve `{\"data\":{\"field1\":\"v1\",\"also\":{\"field2\":\"v2\"}}}`. Do not include \"data\" in front of each field. All other submission fields will always be retrieved.\n"
+              }
+            ]
+          },
+          "docs": "Gets a single workflow submission. Workflow submission data is transformed and returned is a specific format, based on the specified transform. JSON submission data is returned as an object, XML data is returned as a string, and PDF data is returned as a [Cloud Storage Delivery URL](#section/Cloud-Storage-Delivery) to the rendered PDF (and optionally base 64 data).\n### Authorization Required:\n  - See Submission Access ([Submission Access](#submission-access))\n"
+        },
+        {
+          "info": {
+            "name": "Update Workflow Submission",
+            "type": "http"
+          },
+          "http": {
+            "method": "PUT",
+            "url": "https://{host}/api/1.0/workflows/:workflowId/submissions/:submissionId",
+            "params": [
+              {
+                "name": "workflowId",
+                "value": "",
+                "type": "path",
+                "description": "ID of workflow the submission belongs to"
+              },
+              {
+                "name": "submissionId",
+                "value": "",
+                "type": "path",
+                "description": "ID of workflow submission to update"
+              },
+              {
+                "name": "replaceData",
+                "value": "",
+                "type": "query",
+                "description": "Whether to completely replace the submission data with the object passed in \"data\"."
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "This endpoint is available to \"Administrator\" users only. Updates a single workflow submission based on submission ID and, if passed, dataFilter and metadataFilter. This operation supports partial \"data\" updates, i.e. data that is sent in \"data\" may include some but not all of the submission data. Update of the owner/user is supported through \"userId\". Update of current status is supported through \"currentStatus\". Partial metadata updates are supported without including the entire metadata objec"
+        },
+        {
+          "info": {
+            "name": "Delete Workflow Submission",
+            "type": "http"
+          },
+          "http": {
+            "method": "DELETE",
+            "url": "https://{host}/api/1.0/workflows/:workflowId/submissions/:submissionId",
+            "params": [
+              {
+                "name": "workflowId",
+                "value": "",
+                "type": "path",
+                "description": "Unique workflow ID"
+              },
+              {
+                "name": "submissionId",
+                "value": "",
+                "type": "path",
+                "description": "ID of workflow submission to delete"
+              },
+              {
+                "name": "destroy",
+                "value": "",
+                "type": "query",
+                "description": "Whether to hard delete the submission from database. Value of 'destroy=true' will delete the submission. This option requires administrator privileges. Once deleted, the submission cannot be retrieved back."
+              }
+            ]
+          },
+          "docs": "Deletes a single workflow submission based on the ID supplied. Note that workflow submissions are soft-deleted (marked deleted, but not removed).\n### Authorization Required:\n  - See Submission Access ([Submission Access](#submission-access))\n"
+        }
+      ]
+    },
+    {
+      "info": {
+        "name": "Revisions",
+        "type": "folder"
+      },
+      "items": [
+        {
+          "info": {
+            "name": "Get Module Submission Revisions",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://{host}/api/1.0/modules/:moduleId/submissions/:submissionId/revisions",
+            "params": [
+              {
+                "name": "moduleId",
+                "value": "",
+                "type": "path",
+                "description": "Unique module ID"
+              },
+              {
+                "name": "submissionId",
+                "value": "",
+                "type": "path",
+                "description": "ID of module submission to retrieve revisions for"
+              },
+              {
+                "name": "limit",
+                "value": "",
+                "type": "query",
+                "description": "Maximum number of results to return (default 50, maximum 50)"
+              },
+              {
+                "name": "offset",
+                "value": "",
+                "type": "query",
+                "description": "Number of results to skip before selecting results. Offset is zero based."
+              },
+              {
+                "name": "sortBy",
+                "value": "",
+                "type": "query",
+                "description": "Field to sort by (currently supported - `\"created\"`, `\"modified\"`)"
+              },
+              {
+                "name": "sortOrder",
+                "value": "",
+                "type": "query",
+                "description": "Order of sort, if `sortBy` is specified.  One of [`1` (ascending),`-1` (descending)]"
+              },
+              {
+                "name": "metadataFilter",
+                "value": "",
+                "type": "query",
+                "description": "Filter condition against submission \"metadata\" field. Value must be a stringified MongoDB query condition (see Examples, below). MongoDB [dot notation](https://docs.mongodb.com/manual/core/document/#dot-notation) is supported for keys.\n\nNOTE: MongoDB selectors that can be nested inside queries (such as [Comparison](https://docs.mongodb.com/manual/reference/operator/query/#comparison) and [Element](https://docs.mongodb.com/manual/reference/operator/query/#element) Selectors, e.g. `$eq`, `$in`, `$exists`) are supported. The following [Logical](https://docs.mongodb.com/manual/reference/operator/query/#logical) Selectors are also supported: `$and`, `$or`, `$nor`\n\nExamples:\n- `metadataFilter: {\"checkpoints.complete\": 1234}`\n- `metadataFilter: {\"checkpoints.complete\": {\"$exists\": true}, \"checkpoints.processed\": {\"$exists\": false}}`\n\n  - Will return submissions where both `metadata.checkpoints.complete` exists AND `metadata.checkpoints.processed` does not exist\n"
+              }
+            ]
+          },
+          "docs": "Get all revisions for a submission. The data field is left empty.\n### Authorization Required:\n  - See Submission Access ([Submission Access](#submission-access))\n"
+        },
+        {
+          "info": {
+            "name": "Get Module Submission Revision",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://{host}/api/1.0/modules/:moduleId/submissions/:submissionId/revisions/:revisionId",
+            "params": [
+              {
+                "name": "moduleId",
+                "value": "",
+                "type": "path",
+                "description": "Unique module ID"
+              },
+              {
+                "name": "submissionId",
+                "value": "",
+                "type": "path",
+                "description": "ID of module submission to retrieve revisions for"
+              },
+              {
+                "name": "revisionId",
+                "value": "",
+                "type": "path",
+                "description": "ID of the particular submission revision to retrieve. To retrieve all submission revisions, do not include this path parameter"
+              },
+              {
+                "name": "transformName",
+                "value": "",
+                "type": "query",
+                "description": "Transform to apply to module for output. Transform must be configured and designated for output. Available transforms may be listed via the /transforms endpoint. Only available for single revisions"
+              },
+              {
+                "name": "includeRaw",
+                "value": "",
+                "type": "query",
+                "description": "Whether to include the untransformed raw submission data in addition to the transformed data. Raw submission data may contain [Cloud Storage Delivery URLs](#section/Cloud-Storage-Delivery). Only available for single revisions"
+              },
+              {
+                "name": "includeBase64",
+                "value": "",
+                "type": "query",
+                "description": "Whether to include base64 PDF data in addition to the PDF url (for \"njk-pdf\" transforms). Only available for single revisions"
+              },
+              {
+                "name": "resolveCloudStorageUrls",
+                "value": "",
+                "type": "query",
+                "description": "When `transformName` is specified, Cloud Storage URLs are already resolved to the original base64 value. When this flag is specified, resolve Cloud Storage URLs to base64 data inside \"rawData\", as well. Only available for single revisions"
+              },
+              {
+                "name": "dataFields",
+                "value": "",
+                "type": "query",
+                "description": "Comma-separated list of dot-notation `data` fields to retrieve; for example, `&dataFields=field1,also.field2` will retrieve `{\"data\":{\"field1\":\"v1\",\"also\":{\"field2\":\"v2\"}}}`. Do not include \"data\" in front of each field. All other submission fields will always be retrieved.\n"
+              }
+            ]
+          },
+          "docs": "Gets a single revision for a submission. Revision data is transformed and returned in a specific format, based on the specified transform. JSON revisions data is returned as an object, XML data is returned as a string, and PDF data is returned as a [Cloud Storage Delivery URL](#section/Cloud-Storage-Delivery) to the rendered PDF (and optionally base 64 data).\n### Authorization Required:\n  - See Submission Access ([Submission Access](#submission-access))\n"
+        },
+        {
+          "info": {
+            "name": "Get Workflow Submission Revisions",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://{host}/api/1.0/workflows/:workflowId/submissions/:submissionId/revisions",
+            "params": [
+              {
+                "name": "workflowId",
+                "value": "",
+                "type": "path",
+                "description": "Unique workflow ID"
+              },
+              {
+                "name": "submissionId",
+                "value": "",
+                "type": "path",
+                "description": "ID of workflow submission to retrieve revisions for"
+              },
+              {
+                "name": "limit",
+                "value": "",
+                "type": "query",
+                "description": "Maximum number of results to return (default 50, maximum 50)"
+              },
+              {
+                "name": "offset",
+                "value": "",
+                "type": "query",
+                "description": "Number of results to skip before selecting results. Offset is zero based."
+              },
+              {
+                "name": "sortBy",
+                "value": "",
+                "type": "query",
+                "description": "Field to sort by (currently supported - `\"created\"`, `\"modified\"`)"
+              },
+              {
+                "name": "sortOrder",
+                "value": "",
+                "type": "query",
+                "description": "Order of sort, if `sortBy` is specified.  One of [`1` (ascending),`-1` (descending)]"
+              },
+              {
+                "name": "metadataFilter",
+                "value": "",
+                "type": "query",
+                "description": "Filter condition against submission \"metadata\" field. Value must be a stringified MongoDB query condition (see Examples, below). MongoDB [dot notation](https://docs.mongodb.com/manual/core/document/#dot-notation) is supported for keys.\n\nNOTE: MongoDB selectors that can be nested inside queries (such as [Comparison](https://docs.mongodb.com/manual/reference/operator/query/#comparison) and [Element](https://docs.mongodb.com/manual/reference/operator/query/#element) Selectors, e.g. `$eq`, `$in`, `$exists`) are supported. The following [Logical](https://docs.mongodb.com/manual/reference/operator/query/#logical) Selectors are also supported: `$and`, `$or`, `$nor`\n\nExamples:\n- `metadataFilter: {\"checkpoints.complete\": 1234}`\n- `metadataFilter: {\"checkpoints.complete\": {\"$exists\": true}, \"checkpoints.processed\": {\"$exists\": false}}`\n\n  - Will return submissions where both `metadata.checkpoints.complete` exists AND `metadata.checkpoints.processed` does not exist\n"
+              }
+            ]
+          },
+          "docs": "Gets all revisions for a submission. The data field is left empty.\n### Authorization Required:\n  - See Submission Access ([Submission Access](#submission-access))\n"
+        },
+        {
+          "info": {
+            "name": "Get Workflow Submission Revision",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://{host}/api/1.0/workflows/:workflowId/submissions/:submissionId/revisions/:revisionId",
+            "params": [
+              {
+                "name": "workflowId",
+                "value": "",
+                "type": "path",
+                "description": "Unique workflow ID"
+              },
+              {
+                "name": "submissionId",
+                "value": "",
+                "type": "path",
+                "description": "ID of workflow submission to retrieve revisions for"
+              },
+              {
+                "name": "revisionId",
+                "value": "",
+                "type": "path",
+                "description": "ID of the particular submission revision to retrieve. To retrieve all submission revisions, do not include this path parameter"
+              },
+              {
+                "name": "transformName",
+                "value": "",
+                "type": "query",
+                "description": "Transform to apply to workflow for output. Transform must be configured and designated for output. Available transforms may be listed via the /transforms endpoint. Only available for single revisions"
+              },
+              {
+                "name": "includeRaw",
+                "value": "",
+                "type": "query",
+                "description": "Whether to include the untransformed raw submission data in addition to the transformed data. Raw submission data may contain [Cloud Storage Delivery URLs](#section/Cloud-Storage-Delivery). Only available for single revisions"
+              },
+              {
+                "name": "includeBase64",
+                "value": "",
+                "type": "query",
+                "description": "Whether to include base64 PDF data in addition to the PDF url (for \"njk-pdf\" transforms). Only available for single revisions"
+              },
+              {
+                "name": "resolveCloudStorageUrls",
+                "value": "",
+                "type": "query",
+                "description": "When `transformName` is specified, Cloud Storage URLs are already resolved to the original base64 value. When this flag is specified, resolve Cloud Storage URLs to base64 data inside \"rawData\", as well. Only available for single revisions"
+              },
+              {
+                "name": "dataFields",
+                "value": "",
+                "type": "query",
+                "description": "Comma-separated list of dot-notation `data` fields to retrieve; for example, `&dataFields=field1,also.field2` will retrieve `{\"data\":{\"field1\":\"v1\",\"also\":{\"field2\":\"v2\"}}}`. Do not include \"data\" in front of each field. All other submission fields will always be retrieved.\n"
+              }
+            ]
+          },
+          "docs": "Gets a single revision for a submission. Revision data is transformed and returned is a specific format, based on the specified transform. JSON revisions data is returned as an object, XML data is returned as a string, and PDF data is returned as a [Cloud Storage Delivery URL](#section/Cloud-Storage-Delivery) to the rendered PDF (and optionally base 64 data).\n### Authorization Required:\n  - See Submission Access ([Submission Access](#submission-access))\n"
+        }
+      ]
+    },
+    {
+      "info": {
+        "name": "Workflow",
+        "type": "folder"
+      },
+      "items": [
+        {
+          "info": {
+            "name": "List of timer start nodes and statuses",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://{host}/api/1.0/workflows/:workflowPath/timerstart",
+            "params": [
+              {
+                "name": "workflowPath",
+                "value": "",
+                "type": "path",
+                "description": "Unique workflow path"
+              }
+            ]
+          },
+          "docs": "Get a list of all timer start nodes and their activity status in a workflow\n### Authorization Required:\n  - Application View\n"
+        },
+        {
+          "info": {
+            "name": "List of Timed Events for Submission Id",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://{host}/api/1.0/workflows/:workflowPath/timedEvents/:submissionId",
+            "params": [
+              {
+                "name": "workflowPath",
+                "value": "",
+                "type": "path",
+                "description": "Unique workflow path"
+              },
+              {
+                "name": "submissionId",
+                "value": "",
+                "type": "path",
+                "description": "ID of workflow submission to retrieve"
+              },
+              {
+                "name": "status",
+                "value": "",
+                "type": "query",
+                "description": "Status of timed event action"
+              },
+              {
+                "name": "actionType",
+                "value": "",
+                "type": "query",
+                "description": "Type of action"
+              },
+              {
+                "name": "timedEventNode",
+                "value": "",
+                "type": "query",
+                "description": "Path of timed event node the action is part of"
+              }
+            ]
+          },
+          "docs": "Get a list of all timed events that have been queued for a submission Id\n### Authorization Required:\n  - See Submission Access ([Submission Access](#submission-access))\n"
+        },
+        {
+          "info": {
+            "name": "Start a Timer Start Node",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://{host}/api/1.0/workflows/:workflowPath/timerstart/:timerStartNodePath/start",
+            "params": [
+              {
+                "name": "workflowPath",
+                "value": "",
+                "type": "path",
+                "description": "Unique workflow path"
+              },
+              {
+                "name": "timerStartNodePath",
+                "value": "",
+                "type": "path",
+                "description": "Unique path of a timer start node in a workflow"
+              }
+            ]
+          },
+          "docs": "Trigger a timer start node to start which will create and execute workflow submissions at the configured frequency\n### Authorization Required:\n  - Application Update\n"
+        },
+        {
+          "info": {
+            "name": "Stop a Timer Start Node",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://{host}/api/1.0/workflows/:workflowPath/timerstart/:timerStartNodePath/stop",
+            "params": [
+              {
+                "name": "workflowPath",
+                "value": "",
+                "type": "path",
+                "description": "Unique workflow path"
+              },
+              {
+                "name": "timerStartNodePath",
+                "value": "",
+                "type": "path",
+                "description": "Unique path of a timer start node in a workflow"
+              }
+            ]
+          },
+          "docs": "Trigger a timer start node to stop which will cancel the scheduled creation and execution of workflow submissions\n### Authorization Required:\n  - Application Update\n"
+        },
+        {
+          "info": {
+            "name": "Run a Timer Start Node Once (Test Run)",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://{host}/api/1.0/workflows/:workflowPath/timerstart/:timerStartNodePath/run-once",
+            "params": [
+              {
+                "name": "workflowPath",
+                "value": "",
+                "type": "path",
+                "description": "Unique workflow path"
+              },
+              {
+                "name": "timerStartNodePath",
+                "value": "",
+                "type": "path",
+                "description": "Unique path of a timer start node in a workflow"
+              }
+            ]
+          },
+          "docs": "Trigger a timer start node to run once (test run) which will create and execute a workflow submission a single time\n### Authorization Required:\n  - Application Update\n"
+        },
+        {
+          "info": {
+            "name": "Create Workflow Submission",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://{host}/api/1.0/workflow-execute/:workflowPath",
+            "params": [
+              {
+                "name": "workflowPath",
+                "value": "",
+                "type": "path",
+                "description": "Unique workflow path"
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Creates a new workflow submission. Submission ID is auto-generated and returned. Workflow submission data must be provided as a JSON object. The default start node will be used.\n### Authorization Required:\n  - Application View or Express Read\n"
+        },
+        {
+          "info": {
+            "name": "Create Workflow Submission from Step",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://{host}/api/1.0/workflow-execute/:workflowPath/:stepPath",
+            "params": [
+              {
+                "name": "workflowPath",
+                "value": "",
+                "type": "path",
+                "description": "Unique workflow path"
+              },
+              {
+                "name": "stepPath",
+                "value": "",
+                "type": "path",
+                "description": "Unique path of workflow step, usually \"start\""
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Creates a new workflow submission. Submission ID is auto-generated and returned. Workflow submission data must be provided as a JSON object.\n### Authorization Required:\n  - Application View or Express Read\n"
+        },
+        {
+          "info": {
+            "name": "Resume workflow",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://{host}/api/1.0/workflow-execute/:workflowPath/resume/:resumePathName/submission/:submissionId",
+            "params": [
+              {
+                "name": "workflowPath",
+                "value": "",
+                "type": "path",
+                "description": "Path of the workflow that is being loaded"
+              },
+              {
+                "name": "resumePathName",
+                "value": "",
+                "type": "path",
+                "description": "Service Task path"
+              },
+              {
+                "name": "submissionId",
+                "value": "",
+                "type": "path",
+                "description": "ID of submission to use."
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Resume a workflow that has encountered a Service Task.\n### Authorization Required:\n  - See Submission Access ([Submission Access](#submission-access))\n"
+        },
+        {
+          "info": {
+            "name": "Handoff submission",
+            "type": "http"
+          },
+          "http": {
+            "method": "PUT",
+            "url": "https://{host}/api/1.0/workflow/:workflowPath/handoff",
+            "params": [
+              {
+                "name": "workflowPath",
+                "value": "",
+                "type": "path",
+                "description": "Path of the workflow to handoff submission"
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Hands off existing submission to specified workflow. This endpoint is available to \"Administrator\" users only.\n### Authorization Required:\n  - Express Super User or Designer Administrator\n"
+        },
+        {
+          "info": {
+            "name": "Restore a Deleted Workflow",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://{host}/api/1.0/workflows/:workflowId/restore",
+            "params": [
+              {
+                "name": "workflowId",
+                "value": "",
+                "type": "path",
+                "description": "ID of workflow to restore"
+              }
+            ]
+          },
+          "docs": "Restores a soft-deleted workflow\n### Authorization Required:\n  - Application Create\n"
+        }
+      ]
+    },
+    {
+      "info": {
+        "name": "Users",
+        "type": "folder"
+      },
+      "items": [
+        {
+          "info": {
+            "name": "Get Users",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://{host}/api/1.0/users",
+            "params": [
+              {
+                "name": "limit",
+                "value": "",
+                "type": "query",
+                "description": "Maximum number of results to return (default 50, maximum 500)"
+              },
+              {
+                "name": "sort",
+                "value": "",
+                "type": "query",
+                "description": "Field to sort by. Use [field name] for ascending and -[field name] for descending order. You can `,` seperate for multiple sort orders."
+              },
+              {
+                "name": "filter",
+                "value": "",
+                "type": "query",
+                "description": "Filter conditions for searching users, formatted like `?filter=name=Bill`. The filters should be `;` separated, as shown below. Supported fields are \"role\", \"name\", \"phone\", \"email\", \"userId\", \"groups\", \"applicationRoles\". All filter conditions are \"starts with\". NOTE: When filtering on `created` and `modified`, all timestamps are in UTC. You need to encode reserved url characters if they are part of the data you are filtering.  Example, * ' ( ) : @ & = + $ , / ? % # [ ] You need to double encode `;` as `%253B` if it is a part of the data you are filtering.\n\nExamples:\n  - `filter=email=john@doe.com` will fetch all users starting with email \"john@doe.com\"\n  - `filter=filter={\"name\":{\"$eq\":\"john@doe.com\"}}` will fetch all users that exactly match \"john@doe.com\"\n  - `filter=role=Admin;created>2019-06-11T21:50:57.067Z` will fetch all user with role starting with \"Admin\" and created after \"2019-06-11T21:50:57.067Z\" (UTC)\n  - `filter=modified=2019-06-11T21:50:57.067Z` will fetch users modified at exactly \"2019-06-11T21:50:57.067Z\" (UTC)\n  - `filter=created>2019-06-11T00:00:00.000Z;created<2019-06-20T00:00:00.000Z` will fetch users created between \"2019-06-11T00:00:00.000Z\" (UTC) and \"2019-06-20T00:00:00.000Z\" (UTC)\n\n\nSupported operators (as specified in this library [api-query-params](https://github.com/loris/api-query-params)):\n  - key=val  `type=public`\n  - key>val  `count>5`\n  - key>=val  `rating>=9.5`\n  - key<val  `createdAt<2016-01-01`\n  - key<=val  `score<=-5`\n  - key!=val  `status!=success`\n  - key=val1,val2  `country=GB,US`\n  - key!=val1,val2  `lang!=fr,en`\n  - key  `phone`\n  - !key  `!email`\n  - key=/value/<opts>  `email=/@gmail\\.com$/i`\n  - key!=/value/<opts> `phone!=/^06/`\n\nNote: multiple forward slashes (/) are interpreted as a regex. To use a string comparison wrap your parameter with string(). Ex. email=string(/@gmail\\.com$/i).\n"
+              },
+              {
+                "name": "showServiceUsers",
+                "value": "",
+                "type": "query",
+                "description": "Whether to allow show all users or all non service users. Note - The value should be passed as true/false\nExamples:\n  - `showServiceUsers=true` will show all the users in the system\n  - `showServiceUsers=false` will show all the non service users\n  - If the argument is not passed, by default all non service users will be displayed.\n"
+              }
+            ]
+          },
+          "docs": "Returns Express user objects. This is a paged endpoint (see Paging).\n### Authorization Required:\n  - Designer Administrator\n"
+        },
+        {
+          "info": {
+            "name": "Create User",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://{host}/api/1.0/users",
+            "params": [
+              {
+                "name": "shouldNotify",
+                "value": "",
+                "type": "query",
+                "description": "Whether to notify the user via email of their temporary password."
+              },
+              {
+                "name": "skipTemporaryPassword",
+                "value": "",
+                "type": "query",
+                "description": "Whether to set the user's password as permanent immediately. A password must be provided in the body if this flag is set. This flag cannot be used if \"shouldNotify\" is also set."
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Creates a new user. If userId is not specified, it is auto-generated and returned.\n### Authorization Required:\n  - Designer Administrator\n"
+        },
+        {
+          "info": {
+            "name": "Get User",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://{host}/api/1.0/users/:userId",
+            "params": [
+              {
+                "name": "userId",
+                "value": "",
+                "type": "path",
+                "description": "ID of user to retrieve"
+              }
+            ]
+          },
+          "docs": "Returns an Express user object based on a user ID.\n### Authorization Required:\n  - Designer Administrator\n"
+        },
+        {
+          "info": {
+            "name": "Update User",
+            "type": "http"
+          },
+          "http": {
+            "method": "PUT",
+            "url": "https://{host}/api/1.0/users/:userId",
+            "params": [
+              {
+                "name": "userId",
+                "value": "",
+                "type": "path",
+                "description": "ID of user to update"
+              },
+              {
+                "name": "shouldNotify",
+                "value": "",
+                "type": "query",
+                "description": "Controls the distribution of the **New Account (Token Invitation)** email.\n\n* `true`: Sends both the \"New Account\" email and the \"User Changed\" email.\n* `false`: Suppresses the \"New Account\" email only. The \"User Changed\" email is still sent to the user.\n\nNote: This parameter acts specifically on the Token Invitation workflow and does not globally suppress all system notifications."
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Updates a single user. Partial updates are supported. To delete a specific custom attribute, pass null for that attribute.\n### Authorization Required:\n  - Designer Administrator\n"
+        },
+        {
+          "info": {
+            "name": "Delete User",
+            "type": "http"
+          },
+          "http": {
+            "method": "DELETE",
+            "url": "https://{host}/api/1.0/users/:userId",
+            "params": [
+              {
+                "name": "userId",
+                "value": "",
+                "type": "path",
+                "description": "ID of user to delete"
+              }
+            ]
+          },
+          "docs": "Deletes a user based on the user ID supplied. Note that users are hard-deleted, and this is not reversible. If a user is a system user, it cannot be deleted.\n### Authorization Required:\n  - Designer Administrator\n"
+        },
+        {
+          "info": {
+            "name": "Get User Password Status",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://{host}/api/1.0/users/:userId/passwordStatus",
+            "params": [
+              {
+                "name": "userId",
+                "value": "",
+                "type": "path",
+                "description": "ID of user to retrieve"
+              }
+            ]
+          },
+          "docs": "Returns the user's password status based on a user ID.\n### Authorization Required:\n  - Designer Administrator\n"
+        }
+      ]
+    },
+    {
+      "info": {
+        "name": "Groups",
+        "type": "folder"
+      },
+      "items": [
+        {
+          "info": {
+            "name": "Get Groups",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://{host}/api/1.0/groups",
+            "params": [
+              {
+                "name": "limit",
+                "value": "",
+                "type": "query",
+                "description": "Maximum number of results to return (default 1000, maximum 1000)"
+              }
+            ]
+          },
+          "docs": "Returns group objects. This is a paged endpoint (see Paging).\n### Authorization Required:\n  - Designer Administrator\n"
+        },
+        {
+          "info": {
+            "name": "Create Group",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://{host}/api/1.0/groups",
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Creates a new group.\n### Authorization Required:\n  - Designer Administrator\n"
+        },
+        {
+          "info": {
+            "name": "Get Group",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://{host}/api/1.0/groups/:groupName",
+            "params": [
+              {
+                "name": "groupName",
+                "value": "",
+                "type": "path",
+                "description": "Name of group to retrieve"
+              }
+            ]
+          },
+          "docs": "Returns a group object based on a group name.\n### Authorization Required:\n  - Designer Administrator\n"
+        },
+        {
+          "info": {
+            "name": "Update Group",
+            "type": "http"
+          },
+          "http": {
+            "method": "PUT",
+            "url": "https://{host}/api/1.0/groups/:groupName",
+            "params": [
+              {
+                "name": "groupName",
+                "value": "",
+                "type": "path",
+                "description": "Name of group to update"
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Updates a single group. Partial updates are supported.\n### Authorization Required:\n  - Designer Administrator\n"
+        },
+        {
+          "info": {
+            "name": "Delete Group",
+            "type": "http"
+          },
+          "http": {
+            "method": "DELETE",
+            "url": "https://{host}/api/1.0/groups/:groupName",
+            "params": [
+              {
+                "name": "groupName",
+                "value": "",
+                "type": "path",
+                "description": "Name of group to delete"
+              }
+            ]
+          },
+          "docs": "Deletes a group based on the group name supplied. Note that groups are hard-deleted, and this is not reversible.\n### Authorization Required:\n  - Designer Administrator\n"
+        }
+      ]
+    },
+    {
+      "info": {
+        "name": "Transforms",
+        "type": "folder"
+      },
+      "items": [
+        {
+          "info": {
+            "name": "Get Transforms",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://{host}/api/1.0/modules/:moduleId/transforms",
+            "params": [
+              {
+                "name": "moduleId",
+                "value": "",
+                "type": "path",
+                "description": "Unique module ID"
+              },
+              {
+                "name": "limit",
+                "value": "",
+                "type": "query",
+                "description": "Maximum number of results to return (default 50, maximum 1000)"
+              }
+            ]
+          },
+          "docs": "Returns transform objects. This is a paged endpoint (see Paging).\n### Authorization Required:\n  - Application View\n"
+        },
+        {
+          "info": {
+            "name": "Create Transform",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://{host}/api/1.0/modules/:moduleId/transforms",
+            "params": [
+              {
+                "name": "moduleId",
+                "value": "",
+                "type": "path",
+                "description": "Unique module ID"
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Creates a new transform.\n### Authorization Required:\n  - Application Create\n"
+        },
+        {
+          "info": {
+            "name": "Get Transform",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://{host}/api/1.0/modules/:moduleId/transforms/:transformName",
+            "params": [
+              {
+                "name": "moduleId",
+                "value": "",
+                "type": "path",
+                "description": "Unique module ID"
+              },
+              {
+                "name": "transformName",
+                "value": "",
+                "type": "path",
+                "description": "Name of transform"
+              }
+            ]
+          },
+          "docs": "Returns a transform object based on a module ID and transform name.\n### Authorization Required:\n  - Application View\n"
+        },
+        {
+          "info": {
+            "name": "Update Transform",
+            "type": "http"
+          },
+          "http": {
+            "method": "PUT",
+            "url": "https://{host}/api/1.0/modules/:moduleId/transforms/:transformName",
+            "params": [
+              {
+                "name": "moduleId",
+                "value": "",
+                "type": "path",
+                "description": "Unique module ID"
+              },
+              {
+                "name": "transformName",
+                "value": "",
+                "type": "path",
+                "description": "Name of transform to update"
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Updates a single transform.\n### Authorization Required:\n  - Application Update\n"
+        },
+        {
+          "info": {
+            "name": "Delete Transform",
+            "type": "http"
+          },
+          "http": {
+            "method": "DELETE",
+            "url": "https://{host}/api/1.0/modules/:moduleId/transforms/:transformName",
+            "params": [
+              {
+                "name": "moduleId",
+                "value": "",
+                "type": "path",
+                "description": "Unique module ID"
+              },
+              {
+                "name": "transformName",
+                "value": "",
+                "type": "path",
+                "description": "Name of transform to delete"
+              }
+            ]
+          },
+          "docs": "Deletes a transform based on the transform name supplied.\n### Authorization Required:\n  - Application Delete\n"
+        }
+      ]
+    },
+    {
+      "info": {
+        "name": "Modules",
+        "type": "folder"
+      },
+      "items": [
+        {
+          "info": {
+            "name": "Get Modules",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://{host}/api/1.0/modules",
+            "params": [
+              {
+                "name": "limit",
+                "value": "",
+                "type": "query",
+                "description": "Maximum number of results to return (default 50, maximum 50)"
+              }
+            ]
+          },
+          "docs": "Returns module objects. This is a paged endpoint (see Paging).\n### Authorization Required:\n  - Application View\n"
+        },
+        {
+          "info": {
+            "name": "Get Module",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://{host}/api/1.0/modules/:moduleId",
+            "params": [
+              {
+                "name": "moduleId",
+                "value": "",
+                "type": "path",
+                "description": "ID of module to retrieve"
+              }
+            ]
+          },
+          "docs": "Returns a module object based on a module ID.\n### Authorization Required:\n  - Application View\n"
+        },
+        {
+          "info": {
+            "name": "Restore a Deleted Module",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://{host}/api/1.0/modules/:moduleId/restore",
+            "params": [
+              {
+                "name": "moduleId",
+                "value": "",
+                "type": "path",
+                "description": "ID of module to restore"
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Restores a soft-deleted module.\n### Authorization Required:\n  - Application Create\n"
+        },
+        {
+          "info": {
+            "name": "Execute Module",
+            "type": "http"
+          },
+          "http": {
+            "method": "PUT",
+            "url": "https://{host}/api/1.0/modules/:moduleId/execute",
+            "params": [
+              {
+                "name": "moduleId",
+                "value": "",
+                "type": "path",
+                "description": "ID of module to use to execute submission"
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Execute module rules/validations configured in specified module with specified submission data, optionally save data. The response will include the saved submission data that would be available in the specified module.\n### Authorization Required:\n  - Designer Administrator or Express Read\n"
+        },
+        {
+          "info": {
+            "name": "Execute via Proxy - GET",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://{host}/api/1.0/modules/:moduleId/api",
+            "params": [
+              {
+                "name": "moduleId",
+                "value": "",
+                "type": "path",
+                "description": "The module specified by moduleId must meet the following requirements -\n  - It MUST be marked as Server-side Execute Only\n  - It MAY be marked as anonymous\n  - It MAY reference a submission data getter for object key _request\n"
+              }
+            ]
+          },
+          "docs": "API request layer for Server Side Execute to allow HTTPS calls to Execute a Module. The path and query string are flexible.\n### Authorization Required:\n  - Designer Administrator or Express Read\n"
+        },
+        {
+          "info": {
+            "name": "Execute via Proxy - POST",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://{host}/api/1.0/modules/:moduleId/api",
+            "params": [
+              {
+                "name": "moduleId",
+                "value": "",
+                "type": "path",
+                "description": "The module specified by moduleId must meet the following requirements -\n  - It MUST be marked as Server-side Execute Only\n  - It MAY be marked as anonymous\n  - It MAY reference a submission data getter for object key _request\n"
+              }
+            ]
+          },
+          "docs": "API request layer for Server Side Execute to allow HTTPS calls to Execute a Module. The request format is flexible and may include files, text, xml or JSON Object. The path and query string are also flexible.\n### Authorization Required:\n  - Designer Administrator or Express Read\n"
+        },
+        {
+          "info": {
+            "name": "Execute via Proxy - PUT",
+            "type": "http"
+          },
+          "http": {
+            "method": "PUT",
+            "url": "https://{host}/api/1.0/modules/:moduleId/api",
+            "params": [
+              {
+                "name": "moduleId",
+                "value": "",
+                "type": "path",
+                "description": "The module specified by moduleId must meet the following requirements -\n  - It MUST be marked as Server-side Execute Only\n  - It MAY be marked as anonymous\n  - It MAY reference a submission data getter for object key _request\n"
+              }
+            ]
+          },
+          "docs": "API request layer for Server Side Execute to allow HTTPS calls to Execute a Module. The request format is flexible and may include files, text, xml or JSON Object. The path and query string are also flexible.\n### Authorization Required:\n  - Designer Administrator or Express Read\n"
+        },
+        {
+          "info": {
+            "name": "Execute via Proxy - PATCH",
+            "type": "http"
+          },
+          "http": {
+            "method": "PATCH",
+            "url": "https://{host}/api/1.0/modules/:moduleId/api",
+            "params": [
+              {
+                "name": "moduleId",
+                "value": "",
+                "type": "path",
+                "description": "The module specified by moduleId must meet the following requirements -\n  - It MUST be marked as Server-side Execute Only\n  - It MAY be marked as anonymous\n  - It MAY reference a submission data getter for object key _request\n"
+              }
+            ]
+          },
+          "docs": "API request layer for Server Side Execute to allow HTTPS calls to Execute a Module. The request format is flexible and may include files, text, xml or JSON Object. The path and query string are also flexible.\n### Authorization Required:\n  - Designer Administrator or Express Read\n"
+        },
+        {
+          "info": {
+            "name": "Execute via Proxy - DELETE",
+            "type": "http"
+          },
+          "http": {
+            "method": "DELETE",
+            "url": "https://{host}/api/1.0/modules/:moduleId/api",
+            "params": [
+              {
+                "name": "moduleId",
+                "value": "",
+                "type": "path",
+                "description": "The module specified by moduleId must meet the following requirements -\n  - It MUST be marked as Server-side Execute Only\n  - It MAY be marked as anonymous\n  - It MAY reference a submission data getter for object key _request\n"
+              }
+            ]
+          },
+          "docs": "API request layer for Server Side Execute to allow HTTPS calls to Execute a Module. The path and query string are flexible.\n### Authorization Required:\n  - Designer Administrator or Express Read\n"
+        }
+      ]
+    },
+    {
+      "info": {
+        "name": "Data Collections",
+        "type": "folder"
+      },
+      "items": [
+        {
+          "info": {
+            "name": "Get Module Accessible Data Collections",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://{host}/api/1.0/modules/:moduleId/accessibleDataCollections",
+            "params": [
+              {
+                "name": "moduleId",
+                "value": "",
+                "type": "path",
+                "description": "ID of module to retrieve"
+              }
+            ]
+          },
+          "docs": "Returns an array of objects containing the data collections name\n### Authorization Required:\n  - Application View\n"
+        },
+        {
+          "info": {
+            "name": "Update Data Collection via Import",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://{host}/api/1.0/dataCollections/:collection/import",
+            "params": [
+              {
+                "name": "collection",
+                "value": "",
+                "type": "path",
+                "description": "name of the data collection\n"
+              }
+            ],
+            "body": {
+              "type": "multipart-form",
+              "data": [
+                {
+                  "name": "file",
+                  "type": "text",
+                  "value": ""
+                }
+              ]
+            }
+          },
+          "docs": "Update an existing data collection via uploading an attached csv file. The CSV file generation endpoint returns a valid file object that can be imported.\n### Authorization Required:\n  - Data Collections Update\n"
+        }
+      ]
+    },
+    {
+      "info": {
+        "name": "Promotions",
+        "type": "folder"
+      },
+      "items": [
+        {
+          "info": {
+            "name": "Promotion Hosts",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://{host}/api/1.0/promote/hosts"
+          },
+          "docs": "Returns list of environments authorized for promotion\n### Authorization Required:\n  - Application Promote or Style Promote or Data Collections Promote\n"
+        },
+        {
+          "info": {
+            "name": "Promote Module",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://{host}/api/1.0/promote/module",
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Promote a specific module\n### Authorization Required:\n  - Application Promote\n"
+        },
+        {
+          "info": {
+            "name": "Promote Reference Data",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://{host}/api/1.0/promote/referenceData",
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Promote a collection of reference data\n### Authorization Required:\n  - Data Collections Promote\n"
+        },
+        {
+          "info": {
+            "name": "Promote Application by items",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://{host}/api/1.0/promote/applicationByItems",
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Promote a specific application with Modules, Workflows, Data Schemas, Data Collections, Module Archives, or Workflow Archives\n### Authorization Required:\n  - Application Promote\n"
+        },
+        {
+          "info": {
+            "name": "Promote Style",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://{host}/api/1.0/promote/style",
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Promote a specific Style\n### Authorization Required:\n  - Style Promote\n"
+        },
+        {
+          "info": {
+            "name": "Promote Groups",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://{host}/api/1.0/promote/groups",
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Promote specific groups or all groups\n### Authorization Required:\n  - Designer Administrator\n"
+        },
+        {
+          "info": {
+            "name": "Promote Roles",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://{host}/api/1.0/promote/roles",
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Promote all roles\n### Authorization Required:\n  - Designer Administrator\n"
+        }
+      ]
+    },
+    {
+      "info": {
+        "name": "Global Variables",
+        "type": "folder"
+      },
+      "items": [
+        {
+          "info": {
+            "name": "Get Global Variables",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://{host}/api/1.0/globalvars"
+          },
+          "docs": "Returns Global Variables objects.\n### Authorization Required:\n  - Designer Administrator\n"
+        },
+        {
+          "info": {
+            "name": "Create Global Variables",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://{host}/api/1.0/globalvars",
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Creates a new Global Variable. 'key' needs to be unique.\n### Authorization Required:\n  - Designer Administrator\n"
+        },
+        {
+          "info": {
+            "name": "Get Global Variable",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://{host}/api/1.0/globalvars/:globalVariableId",
+            "params": [
+              {
+                "name": "globalVariableId",
+                "value": "",
+                "type": "path",
+                "description": "Id of global variable to retrieve"
+              }
+            ]
+          },
+          "docs": "Returns a global variable object based on a global variable Id.\n### Authorization Required:\n  - Designer Administrator\n"
+        },
+        {
+          "info": {
+            "name": "Update Global Variable",
+            "type": "http"
+          },
+          "http": {
+            "method": "PATCH",
+            "url": "https://{host}/api/1.0/globalvars/:globalVariableId",
+            "params": [
+              {
+                "name": "globalVariableId",
+                "value": "",
+                "type": "path",
+                "description": "Id of global variable to update"
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Updates a single global variable. 'key' needs to be unique. Partial updates are supported.\n### Authorization Required:\n  - Designer Administrator\n"
+        },
+        {
+          "info": {
+            "name": "Delete Global Variable",
+            "type": "http"
+          },
+          "http": {
+            "method": "DELETE",
+            "url": "https://{host}/api/1.0/globalvars/:globalVariableId",
+            "params": [
+              {
+                "name": "globalVariableId",
+                "value": "",
+                "type": "path",
+                "description": "Id of global variable to delete"
+              }
+            ]
+          },
+          "docs": "Soft deletes a single global variable.\n### Authorization Required:\n  - Designer Administrator\n"
+        }
+      ]
+    },
+    {
+      "info": {
+        "name": "Applications",
+        "type": "folder"
+      },
+      "items": [
+        {
+          "info": {
+            "name": "Determine if a resource is in an application",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://{host}/api/1.0/applications/:applicationId/:appType/:resourceId/isInApplication",
+            "params": [
+              {
+                "name": "applicationId",
+                "value": "",
+                "type": "path",
+                "description": "Unique identifier for an application\n"
+              },
+              {
+                "name": "appType",
+                "value": "",
+                "type": "path",
+                "description": "Type of application, either 'module' or 'workflow'\n"
+              },
+              {
+                "name": "resourceId",
+                "value": "",
+                "type": "path",
+                "description": "Unique identifier for a resource\n"
+              }
+            ]
+          },
+          "docs": "Determines if a resource is in an application.\n"
+        },
+        {
+          "info": {
+            "name": "Get components export",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://{host}/api/1.0/applications/:applicationId/components/export",
+            "params": [
+              {
+                "name": "applicationId",
+                "value": "",
+                "type": "path",
+                "description": "Unique identifier for an application\n"
+              }
+            ]
+          },
+          "docs": "Builds and returns a CSV file export of application components.\n\nA file will be downloaded if triggered in the browser with the file name of `application-{applicationId}-components.csv`\n\nHeader:\n\n\n  `\"Module Name\",\"Component Type\",\"Component Label\",\"Component Property Name\",\"Is Hidden? (Y/N)\",\"Is Disabled? (Y/N)\",\"Is Persistent? (Y/N)\",\"Field Tags\",\"Is Required? (Y/N)\"`\n\nExample:\n\n\n  `\"testapp\",\"textfield\",\"Text Field\",\"firstName\",\"N\",\"N\",\"Y\",\"textField,name\",\"N\"`\n\n  `\"testapp\",\"button\",\"Submit\""
+        },
+        {
+          "info": {
+            "name": "Get submission data model",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://{host}/api/1.0/applications/:applicationId/submissionDataModel",
+            "params": [
+              {
+                "name": "applicationId",
+                "value": "",
+                "type": "path",
+                "description": "Unique identifier for an application\n"
+              }
+            ]
+          },
+          "docs": "Builds a summary of the submission data model for an application.\n### Authorization Required:\n  - Application View\n"
+        },
+        {
+          "info": {
+            "name": "Get application dependencies",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://{host}/api/1.0/applications/:applicationId/dependencies",
+            "params": [
+              {
+                "name": "applicationId",
+                "value": "",
+                "type": "path",
+                "description": "Unique identifier for an application\n"
+              }
+            ]
+          },
+          "docs": "Builds an application's module dependency tree.\n### Authorization Required:\n  - Application View\n"
+        },
+        {
+          "info": {
+            "name": "Get application's data models dependencies",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://{host}/api/1.0/applications/:applicationId/dataModels/dependencies",
+            "params": [
+              {
+                "name": "applicationId",
+                "value": "",
+                "type": "path",
+                "description": "Unique identifier for an application\n"
+              }
+            ]
+          },
+          "docs": "Returns the dependency list for application's data models\n### Authorization Required:\n  - Application View\n"
+        },
+        {
+          "info": {
+            "name": "Get application modules",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://{host}/api/1.0/applications/:applicationId/modules",
+            "params": [
+              {
+                "name": "applicationId",
+                "value": "",
+                "type": "path",
+                "description": "Unique identifier for an application\n"
+              },
+              {
+                "name": "collation",
+                "value": "",
+                "type": "query",
+                "description": "Collation locale"
+              },
+              {
+                "name": "limit",
+                "value": "",
+                "type": "query",
+                "description": "Maximum number of modules to return"
+              },
+              {
+                "name": "offset",
+                "value": "",
+                "type": "query",
+                "description": "Index of search results at which to begin returning results"
+              },
+              {
+                "name": "sortBy",
+                "value": "",
+                "type": "query",
+                "description": "Field to sort the results by"
+              },
+              {
+                "name": "sortOrder",
+                "value": "",
+                "type": "query",
+                "description": "Order to sort results by (`1` = ascending, `-1` = decending)"
+              },
+              {
+                "name": "includeShared",
+                "value": "",
+                "type": "query",
+                "description": "Include modules shared to parent workspace or the environment"
+              }
+            ]
+          },
+          "docs": "Gets a list of modules tied to an application.\n### Authorization Required:\n  - Application View\n"
+        },
+        {
+          "info": {
+            "name": "Determine if an application's name is unique",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://{host}/api/1.0/applications/unique",
+            "params": [
+              {
+                "name": "name",
+                "value": "",
+                "type": "query",
+                "description": "Name to check if it is a unique application name\n"
+              }
+            ]
+          },
+          "docs": "Determines if an application's name is unique.\n### Authorization Required:\n  - Authenticated\n"
+        },
+        {
+          "info": {
+            "name": "Get application workspace",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://{host}/api/1.0/applications/:applicationId/workspace",
+            "params": [
+              {
+                "name": "applicationId",
+                "value": "",
+                "type": "path",
+                "description": "Unique identifier for an application\n"
+              }
+            ]
+          },
+          "docs": "Gets the workspace that contains the application.\n### Authorization Required:\n  - Application View\n"
+        },
+        {
+          "info": {
+            "name": "Restore application",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://{host}/api/1.0/applications/:applicationId/restore",
+            "params": [
+              {
+                "name": "applicationId",
+                "value": "",
+                "type": "path",
+                "description": "Unique identifier for an application\n"
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Restores an application.\n### Authorization Required:\n  - Application Create\n"
+        },
+        {
+          "info": {
+            "name": "Connect application",
+            "type": "http"
+          },
+          "http": {
+            "method": "PUT",
+            "url": "https://{host}/api/1.0/applications/:applicationId/connect",
+            "params": [
+              {
+                "name": "applicationId",
+                "value": "",
+                "type": "path",
+                "description": "Unique identifier for an application\n"
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Connects elements to an application.\n### Authorization Required:\n  - Application Update\n"
+        },
+        {
+          "info": {
+            "name": "Get applications",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://{host}/api/1.0/applications",
+            "params": [
+              {
+                "name": "limit",
+                "value": "",
+                "type": "query",
+                "description": "Integer to limit the number of applications returned (Cannot exceed 1000)\n"
+              },
+              {
+                "name": "sortBy",
+                "value": "",
+                "type": "query",
+                "description": "Field to sort found applications by\n"
+              },
+              {
+                "name": "offset",
+                "value": "",
+                "type": "query",
+                "description": "Offset for paginated results\n"
+              },
+              {
+                "name": "sortOrder",
+                "value": "",
+                "type": "query",
+                "description": "Sort order for found applications (1 = ascending, -1 = descending)\n"
+              },
+              {
+                "name": "requireEntrypoint",
+                "value": "",
+                "type": "query",
+                "description": "Remove applications that do not have an entrypoint module/workflow\n"
+              }
+            ]
+          },
+          "docs": "Get a list of matching applications, will be filtered by your accessible workspaces based on permissions.\n### Authorization Required:\n  - Application View\n"
+        },
+        {
+          "info": {
+            "name": "Create application",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://{host}/api/1.0/applications",
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Create a new application.\n### Authorization Required:\n  - Application Create\n"
+        },
+        {
+          "info": {
+            "name": "Get application",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://{host}/api/1.0/applications/:applicationId",
+            "params": [
+              {
+                "name": "applicationId",
+                "value": "",
+                "type": "path",
+                "description": "Unique identifier for an application\n"
+              }
+            ]
+          },
+          "docs": "Retrieves application data.\n### Authorization Required:\n  - Application View\n"
+        },
+        {
+          "info": {
+            "name": "Update application",
+            "type": "http"
+          },
+          "http": {
+            "method": "PUT",
+            "url": "https://{host}/api/1.0/applications/:applicationId",
+            "params": [
+              {
+                "name": "applicationId",
+                "value": "",
+                "type": "path",
+                "description": "Unique identifier for an application\n"
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Updates an existing application.\n### Authorization Required:\n  - Application Update\n"
+        },
+        {
+          "info": {
+            "name": "Delete application",
+            "type": "http"
+          },
+          "http": {
+            "method": "DELETE",
+            "url": "https://{host}/api/1.0/applications/:applicationId",
+            "params": [
+              {
+                "name": "applicationId",
+                "value": "",
+                "type": "path",
+                "description": "Unique identifier for an application\n"
+              }
+            ]
+          },
+          "docs": "Deletes application.\n### Authorization Required:\n  - Application Delete\n"
+        }
+      ]
+    },
+    {
+      "info": {
+        "name": "Logs",
+        "type": "folder"
+      },
+      "items": [
+        {
+          "info": {
+            "name": "Get Audit Logs",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://{host}/api/1.0/logs/audit-logs",
+            "params": [
+              {
+                "name": "startDatetime",
+                "value": "",
+                "type": "query",
+                "description": "An international datetime string representing the starting point of the interval to retrieve logs. The timestamp is in UTC. For example, '2023-05-17T15:00:00.000Z' is 15:00 / 3:00PM UTC on May 17th 2023.\n"
+              },
+              {
+                "name": "endDatetime",
+                "value": "",
+                "type": "query",
+                "description": "An international datetime string representing the ending point of the interval to retrieve logs. The timestamp is in UTC. For example, '2023-05-17T16:00:00.000Z' is 16:00 / 4:00PM UTC on May 17th 2023.\n"
+              }
+            ]
+          },
+          "docs": "Retrieve audit logs for a given time period. The time interval between startDatetime and endDatetime must be 1 hour or less.\n### Authorization Required:\n  - Designer Administrator\n"
+        }
+      ]
+    },
+    {
+      "info": {
+        "name": "Credentials",
+        "type": "folder"
+      },
+      "items": [
+        {
+          "info": {
+            "name": "Get credentials",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://{host}/api/1.0/credentials",
+            "params": [
+              {
+                "name": "limit",
+                "value": "",
+                "type": "query",
+                "description": "Integer to limit the number of applications returned (Cannot exceed 1000)\n"
+              },
+              {
+                "name": "sort",
+                "value": "",
+                "type": "query",
+                "description": "Field to sort found applications by\n"
+              },
+              {
+                "name": "offset",
+                "value": "",
+                "type": "query",
+                "description": "Offset for paginated results\n"
+              },
+              {
+                "name": "sortOrder",
+                "value": "",
+                "type": "query",
+                "description": "Sort order for found applications (1 = ascending, -1 = descending)\n"
+              },
+              {
+                "name": "filter",
+                "value": "",
+                "type": "query",
+                "description": "Filter conditions for searching users, formatted like `?filter=name=Bill`. The filters should be `;` separated, as shown below. Supported fields are \"credentialType\", \"name\". All filter conditions are \"starts with\". NOTE: When filtering on `created` and `modified`, all timestamps are in UTC. You need to encode reserved url characters if they are part of the data you are filtering.  Example, * ' ( ) : @ & = + $ , / ? % # [ ] You need to double encode `;` as `%253B` if it is a part of the data you are filtering.\n\nExamples:\n  - `filter=email=john@doe.com` will fetch all users starting with email \"john@doe.com\"\n  - `filter=role=Admin;created>2019-06-11T21:50:57.067Z` will fetch all user with role starting with \"Admin\" and created after \"2019-06-11T21:50:57.067Z\" (UTC)\n  - `filter=modified=2019-06-11T21:50:57.067Z` will fetch users modified at exactly \"2019-06-11T21:50:57.067Z\" (UTC)\n  - `filter=created>2019-06-11T00:00:00.000Z;created<2019-06-20T00:00:00.000Z` will fetch users created between \"2019-06-11T00:00:00.000Z\" (UTC) and \"2019-06-20T00:00:00.000Z\" (UTC)\n\n\nSupported operators (as specified in this library [api-query-params](https://github.com/loris/api-query-params)):\n  - key=val  `type=public`\n  - key>val  `count>5`\n  - key>=val  `rating>=9.5`\n  - key<val  `createdAt<2016-01-01`\n  - key<=val  `score<=-5`\n  - key!=val  `status!=success`\n  - key=val1,val2  `country=GB,US`\n  - key!=val1,val2  `lang!=fr,en`\n  - key  `phone`\n  - !key  `!email`\n  - key=/value/<opts>  `email=/@gmail\\.com$/i`\n  - key!=/value/<opts> `phone!=/^06/`\n\nNote: multiple forward slashes (/) are interpreted as a regex. To use a string comparison wrap your parameter with string(). Ex. email=string(/@gmail\\.com$/i).\n"
+              }
+            ]
+          },
+          "docs": "Get credentials.\n### Authorization Required:\n  - Designer Administrator\n"
+        },
+        {
+          "info": {
+            "name": "Create credential",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://{host}/api/1.0/credentials",
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Create a credential.\n### Authorization Required:\n  - Designer Administrator\n"
+        },
+        {
+          "info": {
+            "name": "Update credential",
+            "type": "http"
+          },
+          "http": {
+            "method": "PUT",
+            "url": "https://{host}/api/1.0/credentials/:clientId",
+            "params": [
+              {
+                "name": "clientId",
+                "value": "",
+                "type": "path",
+                "description": "Unique client ID"
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Updates an existing credential.\n### Authorization Required:\n  - Designer Administrator\n"
+        },
+        {
+          "info": {
+            "name": "Delete credential",
+            "type": "http"
+          },
+          "http": {
+            "method": "DELETE",
+            "url": "https://{host}/api/1.0/credentials/:clientId",
+            "params": [
+              {
+                "name": "clientId",
+                "value": "",
+                "type": "path",
+                "description": "Unique client ID"
+              }
+            ]
+          },
+          "docs": "Deletes credential.\n### Authorization Required:\n  - Designer Administrator\n"
+        },
+        {
+          "info": {
+            "name": "Revoke credential",
+            "type": "http"
+          },
+          "http": {
+            "method": "PUT",
+            "url": "https://{host}/api/1.0/credentials/:clientId/revoke",
+            "params": [
+              {
+                "name": "clientId",
+                "value": "",
+                "type": "path",
+                "description": "Unique client ID"
+              }
+            ]
+          },
+          "docs": "Revoke an existing credential.\n### Authorization Required:\n  - Designer Administrator\n"
+        }
+      ]
+    },
+    {
+      "info": {
+        "name": "Data Model Records",
+        "type": "folder"
+      },
+      "items": [
+        {
+          "info": {
+            "name": "Validate From Schema",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://{host}/api/1.0/models/validateFromSchema",
+            "params": [
+              {
+                "name": "validateRequiredFields",
+                "value": "",
+                "type": "query",
+                "description": "If false, ignore required fields of a schema and validate the format only"
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Requires `enable-data-models-feature` feature flag. Validate data against a json schema, either by schema definition or schema ID. `jsonSchema` or `schemaId` are required parameters.\n### Authorization Required:\n  - Authenticated\n"
+        }
+      ]
+    },
+    {
+      "info": {
+        "name": "Search Configs",
+        "type": "folder"
+      },
+      "items": [
+        {
+          "info": {
+            "name": "Execute a Query",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://{host}/api/1.0/searchConfigs/:queryId/execute",
+            "params": [
+              {
+                "name": "queryId",
+                "value": "",
+                "type": "path",
+                "description": "Unique Query ID"
+              },
+              {
+                "name": "countOnly",
+                "value": "",
+                "type": "query",
+                "description": "Only return the number of records that match the search parameters. These options override the options set in the query itself"
+              },
+              {
+                "name": "limit",
+                "value": "",
+                "type": "query",
+                "description": "Number of records to return. Default and max limit of 50. These options override the options set in the query itself."
+              },
+              {
+                "name": "offset",
+                "value": "",
+                "type": "query",
+                "description": "Number of records to skip before selecting records. Offset is zero based. These options override the options set in the query itself."
+              },
+              {
+                "name": "sort",
+                "value": "",
+                "type": "query",
+                "description": "Name of the field(s) to sort on and the sort direction, can be 1 (ascending) or -1 (descending), separated by a semi-colon. Multiple fields are separated by a comma. Ex. '?firstName:-1,lastName:1'. These options override the options set in the query itself"
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Requires \"enable-search-service-for-query\" feature flag. Must be an administrator or super-user to use this endpoint. Executes a Query to return records.\n### Authorization Required:\n  - Express Super User or Designer Administrator\n"
+        }
+      ]
+    }
+  ],
+  "bundled": true
+}

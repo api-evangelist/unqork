@@ -2,188 +2,192 @@ generated: '2026-07-31'
 method: derived
 source: openapi/unqork-customer-api-openapi.yml
 status: candidate
-summary: >-
-  No official hosted or remote Model Context Protocol (MCP) server was found for
-  Unqork. Searched Unqork's documentation hub, developer portal, the
-  unqork-external GitHub organization, npm and the public MCP registries; probed
-  /.well-known/oauth-protected-resource and /.well-known/agent-card.json on every
-  Unqork host — all misses. The tool set below is DERIVED from the 93 operations
-  of the Unqork Customer API as a proposal for an agent-facing surface. It is NOT
-  published by Unqork, and no `MCPServer` pointer is wired into apis.yml.
+summary: No official hosted or remote Model Context Protocol (MCP) server was found for Unqork. Searched
+  Unqork's documentation hub, developer portal, the unqork-external GitHub organization, npm and the public
+  MCP registries; probed /.well-known/oauth-protected-resource and /.well-known/agent-card.json on every
+  Unqork host — all misses. The tool set below is DERIVED from the 93 operations of the Unqork Customer
+  API as a proposal for an agent-facing surface. It is NOT published by Unqork, and no `MCPServer` pointer
+  is wired into apis.yml.
 server: null
 transport: null
 url: null
 published_by_unqork: false
-
 auth:
   type: oauth2
-  grants: [client_credentials, password]
+  grants:
+  - client_credentials
+  - password
   token_url: https://{subdomain}.unqork.io/api/1.0/oauth2/access_token
   header: 'Authorization: Bearer {access_token}'
   token_lifetime: 1 hour
-  note: >-
-    Any MCP server for Unqork is inherently per-tenant: the subdomain is part of
-    the base URL, and credentials are minted per environment in API Access
-    Management with Express or Creator roles attached. A single hosted server
-    could not serve all customers without per-tenant configuration.
-
+  note: 'Any MCP server for Unqork is inherently per-tenant: the subdomain is part of the base URL, and
+    credentials are minted per environment in API Access Management with Express or Creator roles attached.
+    A single hosted server could not serve all customers without per-tenant configuration.'
 candidate_tools:
-  - name: list_submissions
-    maps_to: GET /modules/{moduleId}/submissions
-    source_operation: openapi/unqork-customer-api-openapi.yml#getModuleSubmissions
-    description: List the submissions captured by a module, with limit/offset paging and filters.
-  - name: get_submission
-    maps_to: GET /modules/{moduleId}/submissions/{submissionId}
-    source_operation: openapi/unqork-customer-api-openapi.yml#getModuleSubmission
-    description: Retrieve a single module submission.
-  - name: search_submissions
-    maps_to: GET /submissions
-    source_operation: openapi/unqork-customer-api-openapi.yml#getAllSubmissions
-    description: Search submissions across every module and workflow in the environment.
-  - name: create_submission
-    maps_to: POST /modules/{moduleId}/submissions
-    source_operation: openapi/unqork-customer-api-openapi.yml#createModuleSubmissions
-    description: Create one or more submissions against a module.
-    write: true
-  - name: update_submission
-    maps_to: PUT /modules/{moduleId}/submissions/{submissionId}
-    source_operation: openapi/unqork-customer-api-openapi.yml#updateModuleSubmission
-    description: Update an existing module submission.
-    write: true
-  - name: delete_submission
-    maps_to: DELETE /modules/{moduleId}/submissions/{submissionId}
-    source_operation: openapi/unqork-customer-api-openapi.yml#deleteModuleSubmission
-    description: Delete a module submission (soft delete unless destroy=true).
-    write: true
-  - name: restore_submission
-    maps_to: POST /modules/{moduleId}/submissions/{submissionId}/restore
-    source_operation: openapi/unqork-customer-api-openapi.yml#restoreDeletedModuleSubmission
-    description: Restore a soft-deleted module submission.
-    write: true
-  - name: list_submission_revisions
-    maps_to: GET /modules/{moduleId}/submissions/{submissionId}/revisions
-    source_operation: openapi/unqork-customer-api-openapi.yml#getModuleSubmissionRevisions
-    description: List the revision history of a submission.
-  - name: execute_module
-    maps_to: PUT /modules/{moduleId}/execute
-    source_operation: openapi/unqork-customer-api-openapi.yml#executeModule
-    description: Execute a module server-side against a submission payload.
-    write: true
-  - name: list_modules
-    maps_to: GET /modules
-    source_operation: openapi/unqork-customer-api-openapi.yml#getModules
-    description: List modules in the environment.
-  - name: get_module
-    maps_to: GET /modules/{moduleId}
-    source_operation: openapi/unqork-customer-api-openapi.yml#getModule
-    description: Retrieve a module definition.
-  - name: list_applications
-    maps_to: GET /applications
-    source_operation: openapi/unqork-customer-api-openapi.yml#applicationsGet
-    description: List applications.
-  - name: get_application
-    maps_to: GET /applications/{applicationId}
-    source_operation: openapi/unqork-customer-api-openapi.yml#applicationsGetById
-    description: Retrieve an application.
-  - name: get_application_modules
-    maps_to: GET /applications/{applicationId}/modules
-    source_operation: openapi/unqork-customer-api-openapi.yml#applicationModules
-    description: List the modules belonging to an application.
-  - name: get_application_dependencies
-    maps_to: GET /applications/{applicationId}/dependencies
-    source_operation: openapi/unqork-customer-api-openapi.yml#applicationsDependencies
-    description: Resolve an application's dependency graph before promotion.
-  - name: get_submission_data_model
-    maps_to: GET /applications/{applicationId}/submissionDataModel
-    source_operation: openapi/unqork-customer-api-openapi.yml#applicationsSubmissionDataModel
-    description: Fetch the submission data model for an application — the schema an agent needs before writing data.
-  - name: start_workflow
-    maps_to: POST /workflow-execute/{workflowPath}
-    source_operation: openapi/unqork-customer-api-openapi.yml#createWorkflowSubmission
-    description: Start a workflow by creating a workflow submission.
-    write: true
-  - name: resume_workflow
-    maps_to: POST /workflow-execute/{workflowPath}/resume/{resumePathName}/submission/{submissionId}
-    source_operation: openapi/unqork-customer-api-openapi.yml#resumeWorkflow
-    description: Resume a paused workflow submission at a named resume point.
-    write: true
-  - name: handoff_submission
-    maps_to: PUT /workflow/{workflowPath}/handoff
-    source_operation: openapi/unqork-customer-api-openapi.yml#handoffSubmission
-    description: Hand a module submission off into a workflow.
-    write: true
-  - name: list_workflow_submissions
-    maps_to: GET /workflows/{workflowId}/submissions
-    source_operation: openapi/unqork-customer-api-openapi.yml#getWorkflowSubmissions
-    description: List submissions belonging to a workflow.
-  - name: list_timer_start_nodes
-    maps_to: GET /workflows/{workflowPath}/timerstart
-    source_operation: openapi/unqork-customer-api-openapi.yml#listTimerStartNodes
-    description: List a workflow's scheduled timer-start nodes and their statuses.
-  - name: list_users
-    maps_to: GET /users
-    source_operation: openapi/unqork-customer-api-openapi.yml#getUsers
-    description: List Express users, with filtering on role, name, email, groups and application roles.
-  - name: get_user
-    maps_to: GET /users/{userId}
-    source_operation: openapi/unqork-customer-api-openapi.yml#getUser
-    description: Retrieve a user.
-  - name: list_groups
-    maps_to: GET /groups
-    source_operation: openapi/unqork-customer-api-openapi.yml#getGroups
-    description: List groups.
-  - name: get_audit_logs
-    maps_to: GET /logs/audit-logs
-    source_operation: openapi/unqork-customer-api-openapi.yml#listAuditLogs
-    description: Read the environment audit trail.
-  - name: list_promotion_hosts
-    maps_to: GET /promote/hosts
-    source_operation: openapi/unqork-customer-api-openapi.yml#getPromotionHosts
-    description: List the environments configuration can be promoted to.
-
+- name: list_submissions
+  maps_to: GET /modules/{moduleId}/submissions
+  source_operation: openapi/unqork-customer-api-openapi.yml#getModuleSubmissions
+  description: List the submissions captured by a module, with limit/offset paging and filters.
+- name: get_submission
+  maps_to: GET /modules/{moduleId}/submissions/{submissionId}
+  source_operation: openapi/unqork-customer-api-openapi.yml#getModuleSubmission
+  description: Retrieve a single module submission.
+- name: search_submissions
+  maps_to: GET /submissions
+  source_operation: openapi/unqork-customer-api-openapi.yml#getAllSubmissions
+  description: Search submissions across every module and workflow in the environment.
+- name: create_submission
+  maps_to: POST /modules/{moduleId}/submissions
+  source_operation: openapi/unqork-customer-api-openapi.yml#createModuleSubmissions
+  description: Create one or more submissions against a module.
+  write: true
+- name: update_submission
+  maps_to: PUT /modules/{moduleId}/submissions/{submissionId}
+  source_operation: openapi/unqork-customer-api-openapi.yml#updateModuleSubmission
+  description: Update an existing module submission.
+  write: true
+- name: delete_submission
+  maps_to: DELETE /modules/{moduleId}/submissions/{submissionId}
+  source_operation: openapi/unqork-customer-api-openapi.yml#deleteModuleSubmission
+  description: Delete a module submission (soft delete unless destroy=true).
+  write: true
+- name: restore_submission
+  maps_to: POST /modules/{moduleId}/submissions/{submissionId}/restore
+  source_operation: openapi/unqork-customer-api-openapi.yml#restoreDeletedModuleSubmission
+  description: Restore a soft-deleted module submission.
+  write: true
+- name: list_submission_revisions
+  maps_to: GET /modules/{moduleId}/submissions/{submissionId}/revisions
+  source_operation: openapi/unqork-customer-api-openapi.yml#getModuleSubmissionRevisions
+  description: List the revision history of a submission.
+- name: execute_module
+  maps_to: PUT /modules/{moduleId}/execute
+  source_operation: openapi/unqork-customer-api-openapi.yml#executeModule
+  description: Execute a module server-side against a submission payload.
+  write: true
+- name: list_modules
+  maps_to: GET /modules
+  source_operation: openapi/unqork-customer-api-openapi.yml#getModules
+  description: List modules in the environment.
+- name: get_module
+  maps_to: GET /modules/{moduleId}
+  source_operation: openapi/unqork-customer-api-openapi.yml#getModule
+  description: Retrieve a module definition.
+- name: list_applications
+  maps_to: GET /applications
+  source_operation: openapi/unqork-customer-api-openapi.yml#applicationsGet
+  description: List applications.
+- name: get_application
+  maps_to: GET /applications/{applicationId}
+  source_operation: openapi/unqork-customer-api-openapi.yml#applicationsGetById
+  description: Retrieve an application.
+- name: get_application_modules
+  maps_to: GET /applications/{applicationId}/modules
+  source_operation: openapi/unqork-customer-api-openapi.yml#applicationModules
+  description: List the modules belonging to an application.
+- name: get_application_dependencies
+  maps_to: GET /applications/{applicationId}/dependencies
+  source_operation: openapi/unqork-customer-api-openapi.yml#applicationsDependencies
+  description: Resolve an application's dependency graph before promotion.
+- name: get_submission_data_model
+  maps_to: GET /applications/{applicationId}/submissionDataModel
+  source_operation: openapi/unqork-customer-api-openapi.yml#applicationsSubmissionDataModel
+  description: Fetch the submission data model for an application — the schema an agent needs before writing
+    data.
+- name: start_workflow
+  maps_to: POST /workflow-execute/{workflowPath}
+  source_operation: openapi/unqork-customer-api-openapi.yml#createWorkflowSubmission
+  description: Start a workflow by creating a workflow submission.
+  write: true
+- name: resume_workflow
+  maps_to: POST /workflow-execute/{workflowPath}/resume/{resumePathName}/submission/{submissionId}
+  source_operation: openapi/unqork-customer-api-openapi.yml#resumeWorkflow
+  description: Resume a paused workflow submission at a named resume point.
+  write: true
+- name: handoff_submission
+  maps_to: PUT /workflow/{workflowPath}/handoff
+  source_operation: openapi/unqork-customer-api-openapi.yml#handoffSubmission
+  description: Hand a module submission off into a workflow.
+  write: true
+- name: list_workflow_submissions
+  maps_to: GET /workflows/{workflowId}/submissions
+  source_operation: openapi/unqork-customer-api-openapi.yml#getWorkflowSubmissions
+  description: List submissions belonging to a workflow.
+- name: list_timer_start_nodes
+  maps_to: GET /workflows/{workflowPath}/timerstart
+  source_operation: openapi/unqork-customer-api-openapi.yml#listTimerStartNodes
+  description: List a workflow's scheduled timer-start nodes and their statuses.
+- name: list_users
+  maps_to: GET /users
+  source_operation: openapi/unqork-customer-api-openapi.yml#getUsers
+  description: List Express users, with filtering on role, name, email, groups and application roles.
+- name: get_user
+  maps_to: GET /users/{userId}
+  source_operation: openapi/unqork-customer-api-openapi.yml#getUser
+  description: Retrieve a user.
+- name: list_groups
+  maps_to: GET /groups
+  source_operation: openapi/unqork-customer-api-openapi.yml#getGroups
+  description: List groups.
+- name: get_audit_logs
+  maps_to: GET /logs/audit-logs
+  source_operation: openapi/unqork-customer-api-openapi.yml#listAuditLogs
+  description: Read the environment audit trail.
+- name: list_promotion_hosts
+  maps_to: GET /promote/hosts
+  source_operation: openapi/unqork-customer-api-openapi.yml#getPromotionHosts
+  description: List the environments configuration can be promoted to.
 excluded_from_candidate_surface:
-  - operations: [credentialsCreate, credentialsUpdate, credentialsDeleteById, credentialsRevoke, generateReferString]
-    reason: >-
-      Credential and authentication-material management. Minting or revoking API
-      client secrets from an agent tool is a privilege-escalation surface and
-      should stay a human, audited administrative action.
-  - operations: [promoteModule, promoteApplicationByItems, promoteDataCollection, promoteStyle, promoteGroups, promoteRoles]
-    reason: >-
-      Promotions move configuration into UAT and Production. Consequence is
-      environment-wide and irreversible in practice; should require human
-      approval rather than sit behind a tool call.
-  - operations: [createUser, updateUser, deleteUser, createGroup, updateGroup, deleteGroup]
-    reason: Identity and access administration; same escalation argument.
-  - operations: [deleteModuleSubmissions, deleteWorkflowSubmissions, applicationsDeleteById]
-    reason: >-
-      Bulk and top-level destructive operations. `destroy=true` makes deletes
-      permanent and unrecoverable.
-
+- operations:
+  - credentialsCreate
+  - credentialsUpdate
+  - credentialsDeleteById
+  - credentialsRevoke
+  - generateReferString
+  reason: Credential and authentication-material management. Minting or revoking API client secrets from
+    an agent tool is a privilege-escalation surface and should stay a human, audited administrative action.
+- operations:
+  - promoteModule
+  - promoteApplicationByItems
+  - promoteDataCollection
+  - promoteStyle
+  - promoteGroups
+  - promoteRoles
+  reason: Promotions move configuration into UAT and Production. Consequence is environment-wide and irreversible
+    in practice; should require human approval rather than sit behind a tool call.
+- operations:
+  - createUser
+  - updateUser
+  - deleteUser
+  - createGroup
+  - updateGroup
+  - deleteGroup
+  reason: Identity and access administration; same escalation argument.
+- operations:
+  - deleteModuleSubmissions
+  - deleteWorkflowSubmissions
+  - applicationsDeleteById
+  reason: Bulk and top-level destructive operations. `destroy=true` makes deletes permanent and unrecoverable.
 agent_safety_notes:
-  - >-
-    NO IDEMPOTENCY. The Unqork API has no Idempotency-Key contract, so a retried
-    create_submission call WILL create a duplicate record. Any MCP server for
-    Unqork must dedupe on the client side or expose creates as confirm-first.
-  - >-
-    Rate limiting is per source IP per server in a 60-second window and is often
-    tuned DOWN by administrators (as low as 100/min). A shared hosted MCP server
-    would pool many agents behind one egress IP and exhaust the window.
-  - >-
-    Authorization is RBAC, not scopes. There is no way to mint a read-only token
-    by scope — least privilege must be expressed by creating a credential bound
-    to a narrow Express/Creator role.
-  - >-
-    Errors are `{code, message}` with no machine-readable error identifier, so an
-    agent cannot reliably distinguish an expired token from a malformed one
-    without string matching.
-  - >-
-    A per-tenant subdomain is required; there is no global api.unqork.com host.
-
+- NO IDEMPOTENCY. The Unqork API has no Idempotency-Key contract, so a retried create_submission call
+  WILL create a duplicate record. Any MCP server for Unqork must dedupe on the client side or expose creates
+  as confirm-first.
+- Rate limiting is per source IP per server in a 60-second window and is often tuned DOWN by administrators
+  (as low as 100/min). A shared hosted MCP server would pool many agents behind one egress IP and exhaust
+  the window.
+- Authorization is RBAC, not scopes. There is no way to mint a read-only token by scope — least privilege
+  must be expressed by creating a credential bound to a narrow Express/Creator role.
+- Errors are `{code, message}` with no machine-readable error identifier, so an agent cannot reliably
+  distinguish an expired token from a malformed one without string matching.
+- A per-tenant subdomain is required; there is no global api.unqork.com host.
 detail: agentic-access/unqork-agentic-access.yml
 crosswalk: null
-crosswalk_note: >-
-  No tool crosswalk is emitted. The crosswalk artifact exists to record where a
-  REAL MCP or GraphQL surface diverges from the REST contract; with no published
-  MCP server and no GraphQL endpoint, a crosswalk of these derived tools back to
-  the operations they were derived from would be circular and carry no
-  information.
+crosswalk_note: No tool crosswalk is emitted. The crosswalk artifact exists to record where a REAL MCP
+  or GraphQL surface diverges from the REST contract; with no published MCP server and no GraphQL endpoint,
+  a crosswalk of these derived tools back to the operations they were derived from would be circular and
+  carry no information.
+deployment:
+  mode: none
+  verified: derived
+  checked: '2026-08-12'
+  source: catalog MCP census
