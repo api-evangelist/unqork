@@ -25,6 +25,18 @@ tags:
 - Low-Code
 - Application Development
 - Enterprise Software
+- Platform-as-a-Service
+- Workflows
+- Financial-Services
+- Insurance
+- Government
+- Application Modernization
+tags_raw:
+- Company
+- No-Code
+- Low-Code
+- Application Development
+- Enterprise Software
 - Platform as a Service
 - Workflow
 - Financial Services
@@ -43,6 +55,13 @@ apis:
   baseURL: https://training.unqork.io/api/1.0
   image: https://developers.unqork.io/unqork-logo.png
   tags:
+  - Submissions
+  - Workflows
+  - Modules
+  - Application
+  - User
+  - Promotions
+  tags_raw:
   - Submissions
   - Workflow
   - Modules
