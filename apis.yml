@@ -44,33 +44,23 @@ tags_raw:
 - Government
 - Application Modernization
 apis:
-- name: Unqork Customer API
-  description: 'Unqork''s customer-facing REST API, based on open standards, for setting and
-    retrieving module submission data and controlling other aspects of an Unqork environment. 93
-    operations across Submissions, Applications, Workflow, Modules, Promotions, Users, Groups,
-    Transforms, Global Variables, Credentials, Revisions, Data Collections, Data Model Records,
-    Search Configs, Logs and Query. All communication is over HTTPS with JSON responses; every
-    request is authorized with an OAuth 2.0 bearer token.'
+- aid: unqork:unqork-applications-api
+  name: Unqork Applications API
+  description: >-
+    An application is the parent of a group of one or more elements. An application can be of either 'Module'
+    (type is `form` in DB) or 'Workflow' type. 'Module' type application cannot have workflow but can
+    have data collections. 'Workflow' type application can have both modules and data collections. There
+    can be only a single workflow in an application.
+
+
+    The following endpoints are available to "Administrator" users only.
   humanURL: https://developers.unqork.io/
   baseURL: https://training.unqork.io/api/1.0
-  image: https://developers.unqork.io/unqork-logo.png
   tags:
-  - Submissions
-  - Workflows
-  - Modules
-  - Application
-  - User
-  - Promotions
-  tags_raw:
-  - Submissions
-  - Workflow
-  - Modules
   - Applications
-  - Users
-  - Promotions
   properties:
   - type: OpenAPI
-    url: openapi/unqork-customer-api-openapi.yml
+    url: openapi/unqork-applications-api-openapi.yml
   - type: Documentation
     url: https://docs.unqork.io/docs/apis-integrations
   - type: APIReference
@@ -87,14 +77,472 @@ apis:
     url: errors/unqork-problem-types.yml
   - type: DataModel
     url: data-model/unqork-data-model.yml
-  - type: Overlay
-    url: overlays/unqork-customer-api-overlay.yaml
+- aid: unqork:unqork-authentication-api
+  name: Unqork Authentication API
+  description: The Authentication API from Unqork — 1 operation(s) for authentication.
+  humanURL: https://developers.unqork.io/
+  baseURL: https://training.unqork.io/api/1.0
+  tags:
+  - Authentication
+  properties:
+  - type: OpenAPI
+    url: openapi/unqork-authentication-api-openapi.yml
+  - type: Documentation
+    url: https://docs.unqork.io/docs/apis-integrations
+  - type: APIReference
+    url: https://developers.unqork.io/
+  - type: Authentication
+    url: authentication/unqork-authentication.yml
+  - type: OAuthScopes
+    url: scopes/unqork-scopes.yml
+  - type: RateLimits
+    url: rate-limits/unqork-rate-limits.yml
+  - type: Conventions
+    url: conventions/unqork-conventions.yml
+  - type: ErrorCatalog
+    url: errors/unqork-problem-types.yml
+  - type: DataModel
+    url: data-model/unqork-data-model.yml
+- aid: unqork:unqork-credentials-api
+  name: Unqork Credentials API
+  description: The Credentials API from Unqork — 3 operation(s) for credentials.
+  humanURL: https://developers.unqork.io/
+  baseURL: https://training.unqork.io/api/1.0
+  tags:
+  - Credentials
+  properties:
+  - type: OpenAPI
+    url: openapi/unqork-credentials-api-openapi.yml
+  - type: Documentation
+    url: https://docs.unqork.io/docs/apis-integrations
+  - type: APIReference
+    url: https://developers.unqork.io/
+  - type: Authentication
+    url: authentication/unqork-authentication.yml
+  - type: OAuthScopes
+    url: scopes/unqork-scopes.yml
+  - type: RateLimits
+    url: rate-limits/unqork-rate-limits.yml
+  - type: Conventions
+    url: conventions/unqork-conventions.yml
+  - type: ErrorCatalog
+    url: errors/unqork-problem-types.yml
+  - type: DataModel
+    url: data-model/unqork-data-model.yml
+- aid: unqork:unqork-data-collections-api
+  name: Unqork Data Collections API
+  description: The Data Collections API from Unqork — 2 operation(s) for data collections.
+  humanURL: https://developers.unqork.io/
+  baseURL: https://training.unqork.io/api/1.0
+  tags:
+  - Data Collections
+  properties:
+  - type: OpenAPI
+    url: openapi/unqork-data-collections-api-openapi.yml
+  - type: Documentation
+    url: https://docs.unqork.io/docs/apis-integrations
+  - type: APIReference
+    url: https://developers.unqork.io/
+  - type: Authentication
+    url: authentication/unqork-authentication.yml
+  - type: OAuthScopes
+    url: scopes/unqork-scopes.yml
+  - type: RateLimits
+    url: rate-limits/unqork-rate-limits.yml
+  - type: Conventions
+    url: conventions/unqork-conventions.yml
+  - type: ErrorCatalog
+    url: errors/unqork-problem-types.yml
+  - type: DataModel
+    url: data-model/unqork-data-model.yml
+- aid: unqork:unqork-data-model-records-api
+  name: Unqork Data Model Records API
+  description: The Data Model Records API from Unqork — 1 operation(s) for data model records.
+  humanURL: https://developers.unqork.io/
+  baseURL: https://training.unqork.io/api/1.0
+  tags:
+  - Data Model Records
+  properties:
+  - type: OpenAPI
+    url: openapi/unqork-data-model-records-api-openapi.yml
+  - type: Documentation
+    url: https://docs.unqork.io/docs/apis-integrations
+  - type: APIReference
+    url: https://developers.unqork.io/
+  - type: Authentication
+    url: authentication/unqork-authentication.yml
+  - type: OAuthScopes
+    url: scopes/unqork-scopes.yml
+  - type: RateLimits
+    url: rate-limits/unqork-rate-limits.yml
+  - type: Conventions
+    url: conventions/unqork-conventions.yml
+  - type: ErrorCatalog
+    url: errors/unqork-problem-types.yml
+  - type: DataModel
+    url: data-model/unqork-data-model.yml
+- aid: unqork:unqork-global-variables-api
+  name: Unqork Global Variables API
+  description: The Global Variables API from Unqork — 2 operation(s) for global variables.
+  humanURL: https://developers.unqork.io/
+  baseURL: https://training.unqork.io/api/1.0
+  tags:
+  - Global Variables
+  properties:
+  - type: OpenAPI
+    url: openapi/unqork-global-variables-api-openapi.yml
+  - type: Documentation
+    url: https://docs.unqork.io/docs/apis-integrations
+  - type: APIReference
+    url: https://developers.unqork.io/
+  - type: Authentication
+    url: authentication/unqork-authentication.yml
+  - type: OAuthScopes
+    url: scopes/unqork-scopes.yml
+  - type: RateLimits
+    url: rate-limits/unqork-rate-limits.yml
+  - type: Conventions
+    url: conventions/unqork-conventions.yml
+  - type: ErrorCatalog
+    url: errors/unqork-problem-types.yml
+  - type: DataModel
+    url: data-model/unqork-data-model.yml
+- aid: unqork:unqork-groups-api
+  name: Unqork Groups API
+  description: The following endpoints are available to "Administrator" users only.
+  humanURL: https://developers.unqork.io/
+  baseURL: https://training.unqork.io/api/1.0
+  tags:
+  - Groups
+  properties:
+  - type: OpenAPI
+    url: openapi/unqork-groups-api-openapi.yml
+  - type: Documentation
+    url: https://docs.unqork.io/docs/apis-integrations
+  - type: APIReference
+    url: https://developers.unqork.io/
+  - type: Authentication
+    url: authentication/unqork-authentication.yml
+  - type: OAuthScopes
+    url: scopes/unqork-scopes.yml
+  - type: RateLimits
+    url: rate-limits/unqork-rate-limits.yml
+  - type: Conventions
+    url: conventions/unqork-conventions.yml
+  - type: ErrorCatalog
+    url: errors/unqork-problem-types.yml
+  - type: DataModel
+    url: data-model/unqork-data-model.yml
+- aid: unqork:unqork-logs-api
+  name: Unqork Logs API
+  description: The Logs API from Unqork — 1 operation(s) for logs.
+  humanURL: https://developers.unqork.io/
+  baseURL: https://training.unqork.io/api/1.0
+  tags:
+  - Logs
+  properties:
+  - type: OpenAPI
+    url: openapi/unqork-logs-api-openapi.yml
+  - type: Documentation
+    url: https://docs.unqork.io/docs/apis-integrations
+  - type: APIReference
+    url: https://developers.unqork.io/
+  - type: Authentication
+    url: authentication/unqork-authentication.yml
+  - type: OAuthScopes
+    url: scopes/unqork-scopes.yml
+  - type: RateLimits
+    url: rate-limits/unqork-rate-limits.yml
+  - type: Conventions
+    url: conventions/unqork-conventions.yml
+  - type: ErrorCatalog
+    url: errors/unqork-problem-types.yml
+  - type: DataModel
+    url: data-model/unqork-data-model.yml
+- aid: unqork:unqork-modules-api
+  name: Unqork Modules API
+  description: The Modules API from Unqork — 5 operation(s) for modules.
+  humanURL: https://developers.unqork.io/
+  baseURL: https://training.unqork.io/api/1.0
+  tags:
+  - Modules
+  properties:
+  - type: OpenAPI
+    url: openapi/unqork-modules-api-openapi.yml
+  - type: Documentation
+    url: https://docs.unqork.io/docs/apis-integrations
+  - type: APIReference
+    url: https://developers.unqork.io/
+  - type: Authentication
+    url: authentication/unqork-authentication.yml
+  - type: OAuthScopes
+    url: scopes/unqork-scopes.yml
+  - type: RateLimits
+    url: rate-limits/unqork-rate-limits.yml
+  - type: Conventions
+    url: conventions/unqork-conventions.yml
+  - type: ErrorCatalog
+    url: errors/unqork-problem-types.yml
+  - type: DataModel
+    url: data-model/unqork-data-model.yml
+- aid: unqork:unqork-promotions-api
+  name: Unqork Promotions API
+  description: >-
+    The following endpoints are available to "Administrator" users and users with the "Promote" permission
+    for the resource.
+  humanURL: https://developers.unqork.io/
+  baseURL: https://training.unqork.io/api/1.0
+  tags:
+  - Promotions
+  properties:
+  - type: OpenAPI
+    url: openapi/unqork-promotions-api-openapi.yml
+  - type: Documentation
+    url: https://docs.unqork.io/docs/apis-integrations
+  - type: APIReference
+    url: https://developers.unqork.io/
+  - type: Authentication
+    url: authentication/unqork-authentication.yml
+  - type: OAuthScopes
+    url: scopes/unqork-scopes.yml
+  - type: RateLimits
+    url: rate-limits/unqork-rate-limits.yml
+  - type: Conventions
+    url: conventions/unqork-conventions.yml
+  - type: ErrorCatalog
+    url: errors/unqork-problem-types.yml
+  - type: DataModel
+    url: data-model/unqork-data-model.yml
+- aid: unqork:unqork-query-api
+  name: Unqork Query API
+  description: The Query API from Unqork — 1 operation(s) for query.
+  humanURL: https://developers.unqork.io/
+  baseURL: https://training.unqork.io/api/1.0
+  tags:
+  - Query
+  properties:
+  - type: OpenAPI
+    url: openapi/unqork-query-api-openapi.yml
+  - type: Documentation
+    url: https://docs.unqork.io/docs/apis-integrations
+  - type: APIReference
+    url: https://developers.unqork.io/
+  - type: Authentication
+    url: authentication/unqork-authentication.yml
+  - type: OAuthScopes
+    url: scopes/unqork-scopes.yml
+  - type: RateLimits
+    url: rate-limits/unqork-rate-limits.yml
+  - type: Conventions
+    url: conventions/unqork-conventions.yml
+  - type: ErrorCatalog
+    url: errors/unqork-problem-types.yml
+  - type: DataModel
+    url: data-model/unqork-data-model.yml
+- aid: unqork:unqork-revisions-api
+  name: Unqork Revisions API
+  description: The Revisions API from Unqork — 4 operation(s) for revisions.
+  humanURL: https://developers.unqork.io/
+  baseURL: https://training.unqork.io/api/1.0
+  tags:
+  - Revisions
+  properties:
+  - type: OpenAPI
+    url: openapi/unqork-revisions-api-openapi.yml
+  - type: Documentation
+    url: https://docs.unqork.io/docs/apis-integrations
+  - type: APIReference
+    url: https://developers.unqork.io/
+  - type: Authentication
+    url: authentication/unqork-authentication.yml
+  - type: OAuthScopes
+    url: scopes/unqork-scopes.yml
+  - type: RateLimits
+    url: rate-limits/unqork-rate-limits.yml
+  - type: Conventions
+    url: conventions/unqork-conventions.yml
+  - type: ErrorCatalog
+    url: errors/unqork-problem-types.yml
+  - type: DataModel
+    url: data-model/unqork-data-model.yml
+- aid: unqork:unqork-search-configs-api
+  name: Unqork Search Configs API
+  description: The Search Configs API from Unqork — 1 operation(s) for search configs.
+  humanURL: https://developers.unqork.io/
+  baseURL: https://training.unqork.io/api/1.0
+  tags:
+  - Search Configs
+  properties:
+  - type: OpenAPI
+    url: openapi/unqork-search-configs-api-openapi.yml
+  - type: Documentation
+    url: https://docs.unqork.io/docs/apis-integrations
+  - type: APIReference
+    url: https://developers.unqork.io/
+  - type: Authentication
+    url: authentication/unqork-authentication.yml
+  - type: OAuthScopes
+    url: scopes/unqork-scopes.yml
+  - type: RateLimits
+    url: rate-limits/unqork-rate-limits.yml
+  - type: Conventions
+    url: conventions/unqork-conventions.yml
+  - type: ErrorCatalog
+    url: errors/unqork-problem-types.yml
+  - type: DataModel
+    url: data-model/unqork-data-model.yml
+- aid: unqork:unqork-submissions-api
+  name: Unqork Submissions API
+  description: The Submissions API from Unqork — 8 operation(s) for submissions.
+  humanURL: https://developers.unqork.io/
+  baseURL: https://training.unqork.io/api/1.0
+  tags:
+  - Submissions
+  properties:
+  - type: OpenAPI
+    url: openapi/unqork-submissions-api-openapi.yml
+  - type: Documentation
+    url: https://docs.unqork.io/docs/apis-integrations
+  - type: APIReference
+    url: https://developers.unqork.io/
+  - type: Authentication
+    url: authentication/unqork-authentication.yml
+  - type: OAuthScopes
+    url: scopes/unqork-scopes.yml
+  - type: RateLimits
+    url: rate-limits/unqork-rate-limits.yml
+  - type: Conventions
+    url: conventions/unqork-conventions.yml
+  - type: ErrorCatalog
+    url: errors/unqork-problem-types.yml
+  - type: DataModel
+    url: data-model/unqork-data-model.yml
+- aid: unqork:unqork-transforms-api
+  name: Unqork Transforms API
+  description: >-
+    The following endpoints are available to "Administrator" users only.
+
+    Transforms should expect the following input data structure:
+
+
+    ***NJK (in):***<br/> Input includes only the `data.rawData` part of the submission object.
+      ```
+      {
+        "firstName": "Al"
+      }
+      ```
+
+
+    ***NJK (out):***<br/> Input includes all of the top-level properties of the submission object, except
+    `data` here refers to `data.rawData`.
+      ```
+      {
+        "data": {
+          "firstName": "Al"
+        },
+        "metadata": {},
+        "created": "2018-01-01T00:00:00.000Z",
+        ...
+      }
+      ```
+
+
+    ***XML (out):***<br/> Input includes all of the top-level properties of the submission object, except
+    `data` here refers to `data.rawData`.
+      ```
+      <submission>
+        <data>
+          <firstName>Al</firstName>
+        </data>
+        <metadata>
+        </metadata>
+        <created>2018-01-01T00:00:00.000Z</created>
+        ...
+      </submission>
+      ```
+  humanURL: https://developers.unqork.io/
+  baseURL: https://training.unqork.io/api/1.0
+  tags:
+  - Transforms
+  properties:
+  - type: OpenAPI
+    url: openapi/unqork-transforms-api-openapi.yml
+  - type: Documentation
+    url: https://docs.unqork.io/docs/apis-integrations
+  - type: APIReference
+    url: https://developers.unqork.io/
+  - type: Authentication
+    url: authentication/unqork-authentication.yml
+  - type: OAuthScopes
+    url: scopes/unqork-scopes.yml
+  - type: RateLimits
+    url: rate-limits/unqork-rate-limits.yml
+  - type: Conventions
+    url: conventions/unqork-conventions.yml
+  - type: ErrorCatalog
+    url: errors/unqork-problem-types.yml
+  - type: DataModel
+    url: data-model/unqork-data-model.yml
+- aid: unqork:unqork-users-api
+  name: Unqork Users API
+  description: The following endpoints are available to "Administrator" users only.
+  humanURL: https://developers.unqork.io/
+  baseURL: https://training.unqork.io/api/1.0
+  tags:
+  - Users
+  properties:
+  - type: OpenAPI
+    url: openapi/unqork-users-api-openapi.yml
+  - type: Documentation
+    url: https://docs.unqork.io/docs/apis-integrations
+  - type: APIReference
+    url: https://developers.unqork.io/
+  - type: Authentication
+    url: authentication/unqork-authentication.yml
+  - type: OAuthScopes
+    url: scopes/unqork-scopes.yml
+  - type: RateLimits
+    url: rate-limits/unqork-rate-limits.yml
+  - type: Conventions
+    url: conventions/unqork-conventions.yml
+  - type: ErrorCatalog
+    url: errors/unqork-problem-types.yml
+  - type: DataModel
+    url: data-model/unqork-data-model.yml
+- aid: unqork:unqork-workflow-api
+  name: Unqork Workflow API
+  description: The Workflow API from Unqork — 10 operation(s) for workflow.
+  humanURL: https://developers.unqork.io/
+  baseURL: https://training.unqork.io/api/1.0
+  tags:
+  - Workflow
+  properties:
+  - type: OpenAPI
+    url: openapi/unqork-workflow-api-openapi.yml
+  - type: Documentation
+    url: https://docs.unqork.io/docs/apis-integrations
+  - type: APIReference
+    url: https://developers.unqork.io/
+  - type: Authentication
+    url: authentication/unqork-authentication.yml
+  - type: OAuthScopes
+    url: scopes/unqork-scopes.yml
+  - type: RateLimits
+    url: rate-limits/unqork-rate-limits.yml
+  - type: Conventions
+    url: conventions/unqork-conventions.yml
+  - type: ErrorCatalog
+    url: errors/unqork-problem-types.yml
+  - type: DataModel
+    url: data-model/unqork-data-model.yml
 maintainers:
 - FN: Kin Lane
   email: kin@apievangelist.com
 - FN: APIs.json
   email: info@apis.io
 common:
+- type: Overlay
+  url: overlays/unqork-customer-api-overlay.yaml
 - type: MCPServer
   url: mcp/unqork-mcp.yml
 - type: AgenticAccess
