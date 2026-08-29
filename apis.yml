@@ -10,6 +10,18 @@ description: 'Unqork is an enterprise application development platform — a no-
   Unqork environment. The API is served per-tenant at https://{subdomain}.unqork.io/api/1.0, secured
   with OAuth 2.0 client-credentials and password grants issued through API Access Management, and the
   platform ships on a quarterly GA release cadence with weekly patch releases.'
+deliveryModel:
+  model: saas
+  open_source: false
+  commercial: true
+  callable_host: false
+  label: Hosted service · you call their endpoint
+  confidence: medium
+  source:
+  - openapi
+  - pricing
+  generated: '2026-08-28'
+  method: derived
 image: https://developers.unqork.io/unqork-logo.png
 url: https://raw.githubusercontent.com/api-evangelist/unqork/refs/heads/main/apis.yml
 x-type: company
