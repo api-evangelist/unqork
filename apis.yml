@@ -553,6 +553,9 @@ maintainers:
 - FN: APIs.json
   email: info@apis.io
 common:
+- type: CapabilityMap
+  url: capabilities/unqork-capability-edges.yml
+  name: Unqork Business Capability Map
 - type: Overlay
   url: overlays/unqork-customer-api-overlay.yaml
 - type: MCPServer
