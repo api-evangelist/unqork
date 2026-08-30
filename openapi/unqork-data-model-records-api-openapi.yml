@@ -1,0 +1,147 @@
+openapi: 3.2.0
+info:
+  version: 1.0.0
+  x-logo:
+    url: https://developers.unqork.io/unqork-logo.png
+    backgroundColor: '#FFFFFF'
+  title: Unqork Customer Data Model Records API
+  description: "\nUnqork's customer REST API, based on open standards, allows you to set and retrieve module submission data, as well as control other aspects of your Unqork environment. You can use any web development language to access the API, as communication is over secured HTTP.\n## URI Structure and Methods\nAll API communication will occur over SSL (HTTPS). All API responses are in JSON format.\nAll Unqork requests begin with the prefix:\n\n```\n  https://{yourSubdomain}.unqork.io/api/1.0\n```\n\nFor example, if your subdomain is **xyzfinancial**, you would use the prefix `https://xyzfinancial.unqork.io/api/1.0`.\n\nThe next segment of the URI path will vary based on the endpoint of the request.\n\nA given endpoint (resource) has a series of actions (methods) associated with it. The Unqork API supports these standard HTTP methods:\n\n- **GET** - retrieves data\n\n- **PUT** - updates existing data\n\n- **POST** - creates new data\n\n- **DELETE** - deletes existing data\n\nFor example, you can use the POST action on the module submission resource to create a new module submission.\n## Paging\nPaged endpoints use the [Link header](https://www.w3.org/wiki/LinkHeader). If the link header \"next\" is present, then there are more items to retrieve, and the \"next\" should be followed.\n## Cloud Storage Delivery\nUnqork exposes generated PDFs, uploaded attachments, and other file-like pieces of submission data via Cloud Storage Delivery URLs. These are signed, expiring links that allow the user to securely retrieve files stored in Unqork. Links can appear inside raw submission data, or they can be returned from PDF transform submission endpoints.\n\nThese links cannot be shared with other parties; only the user who generates the unique link (by either submitting the file or accessing the submission where the file has been saved) will be able to use that specifically generated link. This means that the user must be authenticated (either in the browser, or by passing a valid OAuth Bearer token) in order to retrieve the file.\n\nCloud Storage Delivery URLs will look like this:\n\n`https://xyzfinancial.unqork.io/fbu/files/{filePath}?signature={signature}`\n\nThe file can be retrieved by accessing the link in the browser, or like this:\n\n```\n  $ curl -H \"Authorization: Bearer {access_token}\" https://xyzfinancial.unqork.io/fbu/files/{filePath}?signature={signature}\n```\n## Nomenclature\nPreviously, \"Modules\" were called \"Forms\". This nomenclature change affects all endpoints documented here in paths, request parameters, and response bodies (e.g. `forms -> modules`, `formId -> moduleId`; however, the behaviors of the endpoints are the same. The previous endpoints will continue to be supported, but they will be deprecated in the future.\n## API Access Notes\n#### Express Module and Workflow Access <a name=\"express-module-workflow-access\"></a>\nExpress Module and Workflow Access is determined by a User's Role and the Module's permissions. An Express User's Role is specified at the environment level, but can be overwritten at the Application level using Application Roles. If Module Permissions are used, the permission settings will specify what access (Read, Write, Obfuscate, or None) a User will have to the Module. Anonymous Users may also be able to access a Module if the permission settings allow it.\n#### Submission Access <a name=\"submission-access\"></a>\nSubmission Access is determined by a User's Role, Groups, and if they are the owner of the Submission. A Submission owner is the user that created or updated the Submission. If a user is a Submission owner, Designer Administrator, or an Express Super User, the user has access to the Submission. If the User does not have access to the Module or Workflow that the Submission is associated with, then the User will not have access to the Submission. See Express Module and Workflow Access ([Express Module and Workflow Access](#express-module-workflow-access)). A User's Role Groups can also provide a User Access to a Submission. A User needs to have Intersecting Groups with the Submission Owner. Intersecting Groups means a User has a Role with a Group (Groups assigned directly to the User do not count) that is in the Submission owner's groups (the Submission owners Role Groups or the Submission owners User Groups). If a User has Intersecting Groups:\n- And the Group type is ignore role, a User that has Intersecting Groups can access the Submission.\n- And the Group type is Role descendents, a User that has Intersecting Groups and the Submission owner's Role is a descendant of the User's Role then the User can access the Submission.\n- And the Group type is own Role and descendents, a User that has Intersecting Groups and the Submission owner's Role is a descendent of the User's Role or the User's Role is the same as the Submission owner's Role then the User can access the Submission.\n"
+servers:
+- url: https://{host}/api/1.0
+  variables:
+    host:
+      default: env.unqork.io
+      description: Environment host
+security:
+- OAuth2: []
+tags:
+- name: Data Model Records
+paths:
+  /models/validateFromSchema:
+    post:
+      x-unqork-service: true
+      tags:
+      - Data Model Records
+      summary: Validate From Schema
+      description: "Requires `enable-data-models-feature` feature flag. Validate data against a json schema, either by schema definition or schema ID. `jsonSchema` or `schemaId` are required parameters.\n### Authorization Required:\n  - Authenticated\n"
+      parameters:
+      - name: validateRequiredFields
+        in: query
+        description: If false, ignore required fields of a schema and validate the format only
+        schema:
+          type: boolean
+          default: true
+      requestBody:
+        content:
+          application/json:
+            schema:
+              required:
+              - data
+              properties:
+                data:
+                  description: Data to validate against
+                  type: object
+                draftVersion:
+                  description: JSON Schema draft version. For more information on JSON Schema draft versions - https://json-schema.org/specification-links
+                  type: string
+                  default: draft-07
+                  enum:
+                  - draft-06
+                  - draft-07
+                  - draft-2019-09
+                  - draft-2020-12
+                fieldMapping:
+                  description: 'Field map to validate against
+
+
+                    e.g. `[{ field: ''name'', model: ''modelId'', type: ''string'', connectedTo: ''name1'' }, { field: ''price'', model: ''modelId'', type: ''number'', connectedTo: ''price1'' }]`
+
+                    '
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      connectedTo:
+                        type: string
+                        description: Property ID of the component that is mapped to the data property
+                      field:
+                        type: string
+                        description: Property ID of the data property
+                      model:
+                        type: string
+                        description: ID of the data model the field belongs to
+                      type:
+                        type: string
+                        description: Type of the data property
+                jsonSchema:
+                  description: Schema to validate data
+                  type: object
+                schemaId:
+                  description: Schema ID to validate data
+                  type: string
+      responses:
+        '200':
+          description: Successful
+          content:
+            application/json:
+              schema:
+                type: object
+                description: 'An object with a key of `data`, with a value that is an object. That object has keys that are the `fieldMapping` `field` with the matching data property as the value. If no `fieldMapping` is passed, then the passed `data` is returned if no errors are encountered.
+
+                  e.g. Given the data below plus the `fieldMapping` example -
+
+
+                  **data:** `{ name1: ''shirt'', price1: 1, addProp: ''extra'' }`
+
+
+                  **jsonSchema:** `{ title: ''Sample Schema'', type: ''object'', properties: { name: { type: ''string'' }, price: { type: ''number'' } }, required: [''name''] }`
+
+
+                  **Response:**
+
+
+                  `{ data: { ''modelId'': { name: ''shirt'', price: 1 } } }`
+
+                  '
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+components:
+  schemas:
+    Error:
+      type: object
+      description: Error
+      required:
+      - code
+      - message
+      properties:
+        code:
+          description: HTTP status code
+          type: integer
+          format: int32
+          enum:
+          - 400
+          - 401
+          - 403
+          - 404
+          - 412
+          - 500
+        message:
+          description: Error message
+          type: string
+  securitySchemes:
+    OAuth2:
+      description: "The Unqork API implements the [OAuth 2.0 Client Credentials Grant](https://datatracker.ietf.org/doc/html/rfc6749#section-1.3.4) and the [OAuth 2.0 Password Grant](https://tools.ietf.org/html/rfc6749#section-1.3.3). Access via OAuth2 Client Credentials Grant can be utilized by creating Client Credentials through the API Access Management Administration page. Access via OAuth2 Password Grant can be enabled for all users in Environment Administration. Once OAuth2 Password Grant is enabled, all Unqork users can use their Unqork username/password to retrieve an access token.\n\nIn order to utilize any of the API resources, you must first retrieve an access token by POSTing your credentials to the access token URL, e.g. using `curl`:\n```\n  $ curl -u '{clientId}:{clientSecret}' -X POST --basic https://xyzfinancial.unqork.io/api/1.0/oauth2/access_token -d \"grant_type=client_credentials\"\n```\nOr:\n```\n  $ curl -X POST https://xyzfinancial.unqork.io/api/1.0/oauth2/access_token -d \"grant_type=password&username={username}&password={password}\"\n```\nThis returns an \"access_token\", which you would then retain and use in any subsequent resource requests. **Access tokens expire after one hour, at which point you must retrieve a new one.** The access token should be included in a request header:\n```\n  $ curl -H \"Authorization: Bearer {access_token}\" https://xyzfinancial.unqork.io/api/1.0/{endpoint}\n```\n"
+      type: oauth2
+      flows:
+        clientCredentials:
+          tokenUrl: https://xyzfinancial.unqork.io/api/1.0/oauth2/access_token
+          scopes:
+            none: N/A
+        password:
+          tokenUrl: https://xyzfinancial.unqork.io/api/1.0/oauth2/access_token
+          scopes:
+            none: N/A

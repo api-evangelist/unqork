@@ -1,0 +1,737 @@
+openapi: 3.2.0
+info:
+  version: 1.0.0
+  x-logo:
+    url: https://developers.unqork.io/unqork-logo.png
+    backgroundColor: '#FFFFFF'
+  title: Unqork Customer Applications API
+  description: "\nUnqork's customer REST API, based on open standards, allows you to set and retrieve module submission data, as well as control other aspects of your Unqork environment. You can use any web development language to access the API, as communication is over secured HTTP.\n## URI Structure and Methods\nAll API communication will occur over SSL (HTTPS). All API responses are in JSON format.\nAll Unqork requests begin with the prefix:\n\n```\n  https://{yourSubdomain}.unqork.io/api/1.0\n```\n\nFor example, if your subdomain is **xyzfinancial**, you would use the prefix `https://xyzfinancial.unqork.io/api/1.0`.\n\nThe next segment of the URI path will vary based on the endpoint of the request.\n\nA given endpoint (resource) has a series of actions (methods) associated with it. The Unqork API supports these standard HTTP methods:\n\n- **GET** - retrieves data\n\n- **PUT** - updates existing data\n\n- **POST** - creates new data\n\n- **DELETE** - deletes existing data\n\nFor example, you can use the POST action on the module submission resource to create a new module submission.\n## Paging\nPaged endpoints use the [Link header](https://www.w3.org/wiki/LinkHeader). If the link header \"next\" is present, then there are more items to retrieve, and the \"next\" should be followed.\n## Cloud Storage Delivery\nUnqork exposes generated PDFs, uploaded attachments, and other file-like pieces of submission data via Cloud Storage Delivery URLs. These are signed, expiring links that allow the user to securely retrieve files stored in Unqork. Links can appear inside raw submission data, or they can be returned from PDF transform submission endpoints.\n\nThese links cannot be shared with other parties; only the user who generates the unique link (by either submitting the file or accessing the submission where the file has been saved) will be able to use that specifically generated link. This means that the user must be authenticated (either in the browser, or by passing a valid OAuth Bearer token) in order to retrieve the file.\n\nCloud Storage Delivery URLs will look like this:\n\n`https://xyzfinancial.unqork.io/fbu/files/{filePath}?signature={signature}`\n\nThe file can be retrieved by accessing the link in the browser, or like this:\n\n```\n  $ curl -H \"Authorization: Bearer {access_token}\" https://xyzfinancial.unqork.io/fbu/files/{filePath}?signature={signature}\n```\n## Nomenclature\nPreviously, \"Modules\" were called \"Forms\". This nomenclature change affects all endpoints documented here in paths, request parameters, and response bodies (e.g. `forms -> modules`, `formId -> moduleId`; however, the behaviors of the endpoints are the same. The previous endpoints will continue to be supported, but they will be deprecated in the future.\n## API Access Notes\n#### Express Module and Workflow Access <a name=\"express-module-workflow-access\"></a>\nExpress Module and Workflow Access is determined by a User's Role and the Module's permissions. An Express User's Role is specified at the environment level, but can be overwritten at the Application level using Application Roles. If Module Permissions are used, the permission settings will specify what access (Read, Write, Obfuscate, or None) a User will have to the Module. Anonymous Users may also be able to access a Module if the permission settings allow it.\n#### Submission Access <a name=\"submission-access\"></a>\nSubmission Access is determined by a User's Role, Groups, and if they are the owner of the Submission. A Submission owner is the user that created or updated the Submission. If a user is a Submission owner, Designer Administrator, or an Express Super User, the user has access to the Submission. If the User does not have access to the Module or Workflow that the Submission is associated with, then the User will not have access to the Submission. See Express Module and Workflow Access ([Express Module and Workflow Access](#express-module-workflow-access)). A User's Role Groups can also provide a User Access to a Submission. A User needs to have Intersecting Groups with the Submission Owner. Intersecting Groups means a User has a Role with a Group (Groups assigned directly to the User do not count) that is in the Submission owner's groups (the Submission owners Role Groups or the Submission owners User Groups). If a User has Intersecting Groups:\n- And the Group type is ignore role, a User that has Intersecting Groups can access the Submission.\n- And the Group type is Role descendents, a User that has Intersecting Groups and the Submission owner's Role is a descendant of the User's Role then the User can access the Submission.\n- And the Group type is own Role and descendents, a User that has Intersecting Groups and the Submission owner's Role is a descendent of the User's Role or the User's Role is the same as the Submission owner's Role then the User can access the Submission.\n"
+servers:
+- url: https://{host}/api/1.0
+  variables:
+    host:
+      default: env.unqork.io
+      description: Environment host
+security:
+- OAuth2: []
+tags:
+- name: Applications
+  description: '
+
+    An application is the parent of a group of one or more elements. An application can be of either ''Module'' (type is `form` in DB) or ''Workflow'' type. ''Module'' type application cannot have workflow but can have data collections. ''Workflow'' type application can have both modules and data collections. There can be only a single workflow in an application.
+
+
+    The following endpoints are available to "Administrator" users only.
+
+    '
+paths:
+  /applications/{applicationId}/{appType}/{resourceId}/isInApplication:
+    get:
+      tags:
+      - Applications
+      summary: Determine if a resource is in an application
+      operationId: isInApplication
+      description: 'Determines if a resource is in an application.
+
+        '
+      parameters:
+      - $ref: '#/components/parameters/ApplicationId'
+      - name: appType
+        in: path
+        required: true
+        schema:
+          type: string
+        description: 'Type of application, either ''module'' or ''workflow''
+
+          '
+      - name: resourceId
+        in: path
+        required: true
+        schema:
+          type: string
+        description: 'Unique identifier for a resource
+
+          '
+      responses:
+        '200':
+          description: JSON containing a boolean status property
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - status
+                properties:
+                  status:
+                    type: boolean
+                    description: A true or false value describing if the resource is contained in the application
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /applications/{applicationId}/components/export:
+    get:
+      tags:
+      - Applications
+      summary: Get components export
+      operationId: applicationsComponentsExport
+      description: "Builds and returns a CSV file export of application components.\n\nA file will be downloaded if triggered in the browser with the file name of `application-{applicationId}-components.csv`\n\nHeader:\n\n\n  `\"Module Name\",\"Component Type\",\"Component Label\",\"Component Property Name\",\"Is Hidden? (Y/N)\",\"Is Disabled? (Y/N)\",\"Is Persistent? (Y/N)\",\"Field Tags\",\"Is Required? (Y/N)\"`\n\nExample:\n\n\n  `\"testapp\",\"textfield\",\"Text Field\",\"firstName\",\"N\",\"N\",\"Y\",\"textField,name\",\"N\"`\n\n  `\"testapp\",\"button\",\"Submit\",\"btn\",\"N\",\"N\",\"N\",\"\",\"N\"`\n\n  `\"testapp\",\"textarea\",\"Text Area Field\",\"textareaField\",\"N\",\"N\",\"Y\",\"\",\"N\"`\n\n### Authorization Required:\n  - Application View\n"
+      parameters:
+      - $ref: '#/components/parameters/ApplicationId'
+      responses:
+        '200':
+          description: CSV string containing application component data
+          content:
+            text/csv:
+              schema:
+                type: string
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /applications/{applicationId}/submissionDataModel:
+    get:
+      tags:
+      - Applications
+      summary: Get submission data model
+      operationId: applicationsSubmissionDataModel
+      description: "Builds a summary of the submission data model for an application.\n### Authorization Required:\n  - Application View\n"
+      parameters:
+      - $ref: '#/components/parameters/ApplicationId'
+      responses:
+        '200':
+          description: JSON describing the application submission data model schema
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - schema
+                - modules
+                properties:
+                  schema:
+                    type: object
+                    description: JSON object containing properties within an application.
+                    properties:
+                      type:
+                        type: string
+                      properties:
+                        type: object
+                  modules:
+                    type: object
+                    description: JSON object containing all modules within an application.
+                    properties:
+                      moduleId:
+                        type: object
+                        properties:
+                          name:
+                            type: string
+                          title:
+                            type: string
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /applications/{applicationId}/dependencies:
+    get:
+      tags:
+      - Applications
+      summary: Get application dependencies
+      operationId: applicationsDependencies
+      description: "Builds an application's module dependency tree.\n### Authorization Required:\n  - Application View\n"
+      parameters:
+      - $ref: '#/components/parameters/ApplicationId'
+      responses:
+        '200':
+          description: JSON describing the application module dependency tree
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    moduleId:
+                      type: string
+                      description: Unique identifier for a module
+                    moduleName:
+                      type: string
+                      description: Name of a module
+                    moduleTitle:
+                      type: string
+                      description: Title of a module
+                    sharedAnywhere:
+                      type: boolean
+                    parentApplicationTitle:
+                      type: string
+                      description: Title of parent application
+                    isRootDependency:
+                      type: boolean
+                      description: Describes if the dependency is a root dependency
+                    children:
+                      type: array
+                      description: List of children dependencies
+                      items:
+                        type: object
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /applications/{applicationId}/dataModels/dependencies:
+    get:
+      tags:
+      - Applications
+      summary: Get application's data models dependencies
+      operationId: applicationsDataModelsDependencies
+      description: "Returns the dependency list for application's data models\n### Authorization Required:\n  - Application View\n"
+      parameters:
+      - $ref: '#/components/parameters/ApplicationId'
+      responses:
+        '200':
+          description: JSON describing the application's data models dependencies
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  dataModels:
+                    type: array
+                    description: Data Models dependencies
+                    items:
+                      type: object
+                  schemas:
+                    type: array
+                    description: Schema dependencies
+                    items:
+                      type: object
+                  modules:
+                    type: array
+                    description: Modules dependencies
+                    items:
+                      type: object
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /applications/{applicationId}/modules:
+    get:
+      tags:
+      - Applications
+      summary: Get application modules
+      operationId: applicationModules
+      description: "Gets a list of modules tied to an application.\n### Authorization Required:\n  - Application View\n"
+      parameters:
+      - $ref: '#/components/parameters/ApplicationId'
+      - name: collation
+        in: query
+        description: Collation locale
+        schema:
+          type: string
+      - name: limit
+        in: query
+        description: Maximum number of modules to return
+        schema:
+          type: string
+          default: 50
+      - name: offset
+        in: query
+        description: Index of search results at which to begin returning results
+        schema:
+          type: integer
+          default: 0
+      - name: sortBy
+        in: query
+        description: Field to sort the results by
+        schema:
+          type: string
+      - name: sortOrder
+        in: query
+        description: Order to sort results by (`1` = ascending, `-1` = decending)
+        schema:
+          type: integer
+      - name: includeShared
+        in: query
+        description: Include modules shared to parent workspace or the environment
+        schema:
+          type: boolean
+          default: false
+      responses:
+        '200':
+          description: Array containing JSON ojects describing modules
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  required:
+                  - id
+                  - name
+                  - title
+                  - created
+                  - modified
+                  properties:
+                    id:
+                      type: string
+                      description: Id of module
+                    name:
+                      type: string
+                      description: Name of module
+                    title:
+                      type: string
+                      description: Title of module
+                    created:
+                      type: string
+                      description: Date of when the module was created
+                    modified:
+                      type: string
+                      description: Date of when the module was last modified/updated
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /applications/unique:
+    get:
+      tags:
+      - Applications
+      summary: Determine if an application's name is unique
+      operationId: applicationsUniqueName
+      description: "Determines if an application's name is unique.\n### Authorization Required:\n  - Authenticated\n"
+      parameters:
+      - name: name
+        in: query
+        required: true
+        schema:
+          type: string
+        description: 'Name to check if it is a unique application name
+
+          '
+      responses:
+        '200':
+          description: Boolean describing if the supplied name is a unique application name
+          content:
+            application/json:
+              schema:
+                type: boolean
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /applications/{applicationId}/workspace:
+    get:
+      tags:
+      - Applications
+      summary: Get application workspace
+      operationId: applicationsWorkspace
+      description: "Gets the workspace that contains the application.\n### Authorization Required:\n  - Application View\n"
+      parameters:
+      - $ref: '#/components/parameters/ApplicationId'
+      responses:
+        '200':
+          description: JSON object describing found workspace
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - private
+                - parent
+                - _id
+                - name
+                - owner
+                - created
+                - modified
+                properties:
+                  private:
+                    type: boolean
+                    description: If the workspace is private or not
+                  parent:
+                    type: string
+                    description: Parent workspace Id
+                  _id:
+                    type: string
+                    description: Unique identifier of the workspace
+                  name:
+                    type: string
+                    description: Name of the workspace
+                  owner:
+                    type: string
+                    description: Owner of the workspace
+                  created:
+                    type: string
+                    description: Date of when the workspace was created
+                  modified:
+                    type: string
+                    description: Date of when the last modification of the workspace took place
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /applications/{applicationId}/restore:
+    post:
+      tags:
+      - Applications
+      summary: Restore application
+      operationId: applicationsRestore
+      description: "Restores an application.\n### Authorization Required:\n  - Application Create\n"
+      parameters:
+      - $ref: '#/components/parameters/ApplicationId'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              properties:
+                workspaceId:
+                  type: string
+                  description: Unique identifier for the workspace to restore the application to
+      responses:
+        '200':
+          description: JSON object describing restored application
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApplicationResponse'
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /applications/{applicationId}/connect:
+    put:
+      tags:
+      - Applications
+      summary: Connect application
+      operationId: applicationsConnect
+      description: "Connects elements to an application.\n### Authorization Required:\n  - Application Update\n"
+      parameters:
+      - $ref: '#/components/parameters/ApplicationId'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              required:
+              - elementType
+              - elementKeys
+              properties:
+                elementType:
+                  type: string
+                  description: Describes the element being connected to the application. Value should be either 'module' or 'referenceDataCollection'.
+                elementKeys:
+                  type: array
+                  items:
+                    type: string
+      responses:
+        '200':
+          description: Successfully connected
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /applications:
+    post:
+      tags:
+      - Applications
+      summary: Create application
+      operationId: applicationsCreate
+      description: "Create a new application.\n### Authorization Required:\n  - Application Create\n"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              required:
+              - id
+              - name
+              - type
+              - title
+              properties:
+                id:
+                  type: string
+                  description: Id of the new application
+                name:
+                  type: string
+                  description: Name of the new application
+                settings:
+                  type: object
+                revisions:
+                  type: boolean
+                title:
+                  type: string
+                  description: Title of the new application
+                type:
+                  type: string
+                  description: Type of the new application ('form' or 'workflow')
+                workspaceId:
+                  type: string
+                  description: Workspace Id that should contain the new application (default workspace will be used)
+      responses:
+        '201':
+          description: JSON describing the new application
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApplicationResponse'
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    get:
+      tags:
+      - Applications
+      summary: Get applications
+      operationId: applicationsGet
+      description: "Get a list of matching applications, will be filtered by your accessible workspaces based on permissions.\n### Authorization Required:\n  - Application View\n"
+      parameters:
+      - name: limit
+        in: query
+        schema:
+          type: integer
+          default: 1000
+        description: 'Integer to limit the number of applications returned (Cannot exceed 1000)
+
+          '
+      - name: sortBy
+        in: query
+        schema:
+          type: string
+          default: created
+        description: 'Field to sort found applications by
+
+          '
+      - name: offset
+        in: query
+        schema:
+          type: integer
+          default: 0
+        description: 'Offset for paginated results
+
+          '
+      - name: sortOrder
+        in: query
+        schema:
+          type: integer
+          default: 1
+        description: 'Sort order for found applications (1 = ascending, -1 = descending)
+
+          '
+      - name: requireEntrypoint
+        in: query
+        schema:
+          type: boolean
+          default: true
+        description: 'Remove applications that do not have an entrypoint module/workflow
+
+          '
+      responses:
+        '200':
+          description: Array containing JSON objects of each found application
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ApplicationResponse'
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /applications/{applicationId}:
+    get:
+      tags:
+      - Applications
+      summary: Get application
+      operationId: applicationsGetById
+      description: "Retrieves application data.\n### Authorization Required:\n  - Application View\n"
+      parameters:
+      - $ref: '#/components/parameters/ApplicationId'
+      responses:
+        '200':
+          description: JSON describing the found application
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApplicationResponse'
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    put:
+      tags:
+      - Applications
+      summary: Update application
+      operationId: applicationsUpdate
+      description: "Updates an existing application.\n### Authorization Required:\n  - Application Update\n"
+      parameters:
+      - $ref: '#/components/parameters/ApplicationId'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              properties:
+                name:
+                  type: string
+                  description: Updated name
+                settings:
+                  type: object
+                  description: Updated settings
+                title:
+                  type: string
+                  description: Updated title
+                workspaceId:
+                  type: string
+                  description: Updated workspace Id
+      responses:
+        '200':
+          description: JSON describing the updated application
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApplicationResponse'
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    delete:
+      tags:
+      - Applications
+      summary: Delete application
+      operationId: applicationsDeleteById
+      description: "Deletes application.\n### Authorization Required:\n  - Application Delete\n"
+      parameters:
+      - $ref: '#/components/parameters/ApplicationId'
+      responses:
+        '204':
+          description: Deleted
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+components:
+  schemas:
+    ApplicationResponse:
+      type: object
+      required:
+      - created
+      - createdBy
+      - dataSchemas
+      - description
+      - id
+      - modified
+      - modifiedBy
+      - name
+      - promotions
+      - settings
+      - title
+      - type
+      - workspaceId
+      properties:
+        created:
+          type: string
+          description: Date of when the application was created
+        createdBy:
+          type: string
+          description: User who created the application
+        dataSchemas:
+          type: array
+          items:
+            type: object
+        description:
+          type: string
+          description: Description of the application
+        id:
+          type: string
+          description: Unique identifier of the application
+        modified:
+          type: string
+          description: Date of when the application was last modified
+        modifiedBy:
+          type: string
+          description: User who modified the application last
+        name:
+          type: string
+          description: Name of the application
+        promotions:
+          type: object
+        settings:
+          type: object
+        title:
+          type: string
+          description: Title of the application
+        type:
+          type: string
+          description: Type of application ('form' or 'workflow')
+        workspaceId:
+          type: string
+          description: Unique identifier of the workspace containing the application
+    Error:
+      type: object
+      description: Error
+      required:
+      - code
+      - message
+      properties:
+        code:
+          description: HTTP status code
+          type: integer
+          format: int32
+          enum:
+          - 400
+          - 401
+          - 403
+          - 404
+          - 412
+          - 500
+        message:
+          description: Error message
+          type: string
+  parameters:
+    ApplicationId:
+      name: applicationId
+      in: path
+      required: true
+      schema:
+        type: string
+      description: 'Unique identifier for an application
+
+        '
+  securitySchemes:
+    OAuth2:
+      description: "The Unqork API implements the [OAuth 2.0 Client Credentials Grant](https://datatracker.ietf.org/doc/html/rfc6749#section-1.3.4) and the [OAuth 2.0 Password Grant](https://tools.ietf.org/html/rfc6749#section-1.3.3). Access via OAuth2 Client Credentials Grant can be utilized by creating Client Credentials through the API Access Management Administration page. Access via OAuth2 Password Grant can be enabled for all users in Environment Administration. Once OAuth2 Password Grant is enabled, all Unqork users can use their Unqork username/password to retrieve an access token.\n\nIn order to utilize any of the API resources, you must first retrieve an access token by POSTing your credentials to the access token URL, e.g. using `curl`:\n```\n  $ curl -u '{clientId}:{clientSecret}' -X POST --basic https://xyzfinancial.unqork.io/api/1.0/oauth2/access_token -d \"grant_type=client_credentials\"\n```\nOr:\n```\n  $ curl -X POST https://xyzfinancial.unqork.io/api/1.0/oauth2/access_token -d \"grant_type=password&username={username}&password={password}\"\n```\nThis returns an \"access_token\", which you would then retain and use in any subsequent resource requests. **Access tokens expire after one hour, at which point you must retrieve a new one.** The access token should be included in a request header:\n```\n  $ curl -H \"Authorization: Bearer {access_token}\" https://xyzfinancial.unqork.io/api/1.0/{endpoint}\n```\n"
+      type: oauth2
+      flows:
+        clientCredentials:
+          tokenUrl: https://xyzfinancial.unqork.io/api/1.0/oauth2/access_token
+          scopes:
+            none: N/A
+        password:
+          tokenUrl: https://xyzfinancial.unqork.io/api/1.0/oauth2/access_token
+          scopes:
+            none: N/A
