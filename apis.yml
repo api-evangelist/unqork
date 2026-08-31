@@ -69,6 +69,8 @@ apis:
   humanURL: https://developers.unqork.io/
   baseURL: https://training.unqork.io/api/1.0
   tags:
+  - Application
+  tags_raw:
   - Applications
   properties:
   - type: OpenAPI
@@ -225,6 +227,8 @@ apis:
   humanURL: https://developers.unqork.io/
   baseURL: https://training.unqork.io/api/1.0
   tags:
+  - Group
+  tags_raw:
   - Groups
   properties:
   - type: OpenAPI
@@ -501,6 +505,8 @@ apis:
   humanURL: https://developers.unqork.io/
   baseURL: https://training.unqork.io/api/1.0
   tags:
+  - User
+  tags_raw:
   - Users
   properties:
   - type: OpenAPI
@@ -527,6 +533,8 @@ apis:
   humanURL: https://developers.unqork.io/
   baseURL: https://training.unqork.io/api/1.0
   tags:
+  - Workflows
+  tags_raw:
   - Workflow
   properties:
   - type: OpenAPI
