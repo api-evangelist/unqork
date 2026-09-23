@@ -1,0 +1,27 @@
+# Front Door AI Index — unqork — 2026-09-17
+# AI vocabulary counted on the provider's root page. Generated; do not edit.
+# `score` is null unless ownership is `own` — see front_door_ai.py.
+front_door_ai:
+  slug: unqork
+  lexicon_version: '1.0'
+  probed_at: '2026-09-17'
+  host: unqork.com
+  final_host: unqork.com
+  ownership: own
+  owner: unqork
+  shares_host_with: null
+  inherited_from: null
+  verdict: scored
+  score: 19
+  host_score: 19
+  density: 38.78
+  words: 490
+  tiers:
+    agentic: 0
+    core: 19
+    model: 0
+  ambiguous: 2
+  top_terms:
+    AI: 19
+    agent: 1
+    automation: 1
