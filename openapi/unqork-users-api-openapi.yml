@@ -272,27 +272,6 @@ paths:
                 $ref: '#/components/schemas/Error'
 components:
   schemas:
-    Error:
-      type: object
-      description: Error
-      required:
-      - code
-      - message
-      properties:
-        code:
-          description: HTTP status code
-          type: integer
-          format: int32
-          enum:
-          - 400
-          - 401
-          - 403
-          - 404
-          - 412
-          - 500
-        message:
-          description: Error message
-          type: string
     UserPost:
       type: object
       required:
@@ -331,52 +310,6 @@ components:
             type: string
           description: List of groups configured in Unqork OR comma-separated list of groups configured in Unqork (e.g. "group1,group2")
           default: []
-        applicationRoles:
-          type: object
-          description: Map of applications to roles OR comma-separated list of application-role mappings (e.g. "application1:role1,application2:role2")
-        password:
-          type: string
-          format: password
-        isServiceUser:
-          type: boolean
-          format: true/false
-        '...customAttributes':
-          type: string
-          description: Custom attributes can be included as additional keys in the request body. Only string values of custom attributes are supported.
-    UserPut:
-      type: object
-      properties:
-        userId:
-          type: string
-          description: 'The unique identifier of the user account. The userId can only include letters, numbers, and the following characters @,+-_.
-
-
-            **Immutable**: This value cannot be modified. If provided in the request body, it must match the `userId` in the path, or it will be ignored.'
-        name:
-          type: string
-          description: The name can only include letters, numbers, and the following characters @,+-_.'
-        email:
-          type: string
-          maxLength: 254
-          format: email
-          description: Quotes and special characters `"(),:;<>@[]\` are not allowed. The local portion of the email (e.g. local@domain.com) must be > 0 characters and < 64 charaters. There cannot be consecutive dots (e.g. `..`) in the email
-        phone:
-          type: string
-          description: Must be a valid US phone number unless the country code is specified, in which case it is validated with [libphonenumber-js](https://gitlab.com/catamphetamine/libphonenumber-js#definitions)
-        role:
-          type: string
-          description: One of the roles configured in Unqork
-          deprecated: true
-        expressRoles:
-          type: array
-          items:
-            type: string
-          description: Express roles configured in Unqork
-        groups:
-          type: array
-          items:
-            type: string
-          description: List of groups configured in Unqork OR comma-separated list of groups configured in Unqork (e.g. "group1,group2")
         applicationRoles:
           type: object
           description: Map of applications to roles OR comma-separated list of application-role mappings (e.g. "application1:role1,application2:role2")
@@ -442,6 +375,73 @@ components:
         '...customAttributes':
           type: string
           description: Custom attributes will be included as additional keys in the response body.
+    Error:
+      type: object
+      description: Error
+      required:
+      - code
+      - message
+      properties:
+        code:
+          description: HTTP status code
+          type: integer
+          format: int32
+          enum:
+          - 400
+          - 401
+          - 403
+          - 404
+          - 412
+          - 500
+        message:
+          description: Error message
+          type: string
+    UserPut:
+      type: object
+      properties:
+        userId:
+          type: string
+          description: 'The unique identifier of the user account. The userId can only include letters, numbers, and the following characters @,+-_.
+
+
+            **Immutable**: This value cannot be modified. If provided in the request body, it must match the `userId` in the path, or it will be ignored.'
+        name:
+          type: string
+          description: The name can only include letters, numbers, and the following characters @,+-_.'
+        email:
+          type: string
+          maxLength: 254
+          format: email
+          description: Quotes and special characters `"(),:;<>@[]\` are not allowed. The local portion of the email (e.g. local@domain.com) must be > 0 characters and < 64 charaters. There cannot be consecutive dots (e.g. `..`) in the email
+        phone:
+          type: string
+          description: Must be a valid US phone number unless the country code is specified, in which case it is validated with [libphonenumber-js](https://gitlab.com/catamphetamine/libphonenumber-js#definitions)
+        role:
+          type: string
+          description: One of the roles configured in Unqork
+          deprecated: true
+        expressRoles:
+          type: array
+          items:
+            type: string
+          description: Express roles configured in Unqork
+        groups:
+          type: array
+          items:
+            type: string
+          description: List of groups configured in Unqork OR comma-separated list of groups configured in Unqork (e.g. "group1,group2")
+        applicationRoles:
+          type: object
+          description: Map of applications to roles OR comma-separated list of application-role mappings (e.g. "application1:role1,application2:role2")
+        password:
+          type: string
+          format: password
+        isServiceUser:
+          type: boolean
+          format: true/false
+        '...customAttributes':
+          type: string
+          description: Custom attributes can be included as additional keys in the request body. Only string values of custom attributes are supported.
   securitySchemes:
     OAuth2:
       description: "The Unqork API implements the [OAuth 2.0 Client Credentials Grant](https://datatracker.ietf.org/doc/html/rfc6749#section-1.3.4) and the [OAuth 2.0 Password Grant](https://tools.ietf.org/html/rfc6749#section-1.3.3). Access via OAuth2 Client Credentials Grant can be utilized by creating Client Credentials through the API Access Management Administration page. Access via OAuth2 Password Grant can be enabled for all users in Environment Administration. Once OAuth2 Password Grant is enabled, all Unqork users can use their Unqork username/password to retrieve an access token.\n\nIn order to utilize any of the API resources, you must first retrieve an access token by POSTing your credentials to the access token URL, e.g. using `curl`:\n```\n  $ curl -u '{clientId}:{clientSecret}' -X POST --basic https://xyzfinancial.unqork.io/api/1.0/oauth2/access_token -d \"grant_type=client_credentials\"\n```\nOr:\n```\n  $ curl -X POST https://xyzfinancial.unqork.io/api/1.0/oauth2/access_token -d \"grant_type=password&username={username}&password={password}\"\n```\nThis returns an \"access_token\", which you would then retain and use in any subsequent resource requests. **Access tokens expire after one hour, at which point you must retrieve a new one.** The access token should be included in a request header:\n```\n  $ curl -H \"Authorization: Bearer {access_token}\" https://xyzfinancial.unqork.io/api/1.0/{endpoint}\n```\n"

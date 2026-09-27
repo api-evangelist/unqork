@@ -182,30 +182,26 @@ paths:
                 $ref: '#/components/schemas/Error'
 components:
   schemas:
-    TransformPost:
+    Error:
       type: object
+      description: Error
       required:
-      - name
-      - type
-      - io
+      - code
+      - message
       properties:
-        name:
-          type: string
-          description: Can only contain alphanumerics and hyphens
-        type:
-          type: string
+        code:
+          description: HTTP status code
+          type: integer
+          format: int32
           enum:
-          - njk-xml
-          - njk-pdf
-          - njk-txt
-          - njk
-          - xsl
-        io:
-          type: string
-          enum:
-          - in
-          - out
-        template:
+          - 400
+          - 401
+          - 403
+          - 404
+          - 412
+          - 500
+        message:
+          description: Error message
           type: string
     TransformResponse:
       type: object
@@ -224,6 +220,31 @@ components:
           enum:
           - njk-xml
           - njk-pdf
+          - njk
+          - xsl
+        io:
+          type: string
+          enum:
+          - in
+          - out
+        template:
+          type: string
+    TransformPost:
+      type: object
+      required:
+      - name
+      - type
+      - io
+      properties:
+        name:
+          type: string
+          description: Can only contain alphanumerics and hyphens
+        type:
+          type: string
+          enum:
+          - njk-xml
+          - njk-pdf
+          - njk-txt
           - njk
           - xsl
         io:
@@ -255,27 +276,6 @@ components:
           - in
           - out
         template:
-          type: string
-    Error:
-      type: object
-      description: Error
-      required:
-      - code
-      - message
-      properties:
-        code:
-          description: HTTP status code
-          type: integer
-          format: int32
-          enum:
-          - 400
-          - 401
-          - 403
-          - 404
-          - 412
-          - 500
-        message:
-          description: Error message
           type: string
   parameters:
     ModuleID:

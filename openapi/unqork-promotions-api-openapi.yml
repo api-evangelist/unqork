@@ -194,6 +194,76 @@ paths:
                 $ref: '#/components/schemas/Error'
 components:
   schemas:
+    PromotionModuleExecuteRequest:
+      type: object
+      required:
+      - clientName
+      - clientLevel
+      - moduleId
+      properties:
+        clientName:
+          type: string
+          description: Target environment name
+        clientLevel:
+          type: string
+          description: Level of the environment (qa, uat, production, etc.)
+        moduleId:
+          description: ID of module to Promote
+          type: string
+    PromotionReferenceDataExecuteRequest:
+      type: object
+      required:
+      - clientName
+      - clientLevel
+      - collectionName
+      properties:
+        clientName:
+          type: string
+          description: Target environment name
+        clientLevel:
+          type: string
+          description: Level of the environment (qa, uat, production, etc.)
+        collectionName:
+          description: Name of the reference data collection to promote
+          type: string
+    Error:
+      type: object
+      description: Error
+      required:
+      - code
+      - message
+      properties:
+        code:
+          description: HTTP status code
+          type: integer
+          format: int32
+          enum:
+          - 400
+          - 401
+          - 403
+          - 404
+          - 412
+          - 500
+        message:
+          description: Error message
+          type: string
+    PromotionGroupExecuteRequest:
+      type: object
+      required:
+      - clientName
+      - clientLevel
+      properties:
+        clientName:
+          type: string
+          description: Target environment name
+        clientLevel:
+          type: string
+          description: Level of the environment (qa, uat, production, etc.)
+        groupNames:
+          description: Names of the groups to promote
+          type: array
+          items:
+            type: string
     PromotionHosts:
       type: array
       items:
@@ -224,22 +294,6 @@ components:
         clientLevel:
           type: string
           description: Level of the environment (qa, uat, production, etc.)
-    PromotionModuleExecuteRequest:
-      type: object
-      required:
-      - clientName
-      - clientLevel
-      - moduleId
-      properties:
-        clientName:
-          type: string
-          description: Target environment name
-        clientLevel:
-          type: string
-          description: Level of the environment (qa, uat, production, etc.)
-        moduleId:
-          description: ID of module to Promote
-          type: string
     PromotionApplicationByItemExecuteRequest:
       type: object
       required:
@@ -341,60 +395,6 @@ components:
           example:
           - queryId1
           - queryId2
-    Error:
-      type: object
-      description: Error
-      required:
-      - code
-      - message
-      properties:
-        code:
-          description: HTTP status code
-          type: integer
-          format: int32
-          enum:
-          - 400
-          - 401
-          - 403
-          - 404
-          - 412
-          - 500
-        message:
-          description: Error message
-          type: string
-    PromotionGroupExecuteRequest:
-      type: object
-      required:
-      - clientName
-      - clientLevel
-      properties:
-        clientName:
-          type: string
-          description: Target environment name
-        clientLevel:
-          type: string
-          description: Level of the environment (qa, uat, production, etc.)
-        groupNames:
-          description: Names of the groups to promote
-          type: array
-          items:
-            type: string
-    PromotionReferenceDataExecuteRequest:
-      type: object
-      required:
-      - clientName
-      - clientLevel
-      - collectionName
-      properties:
-        clientName:
-          type: string
-          description: Target environment name
-        clientLevel:
-          type: string
-          description: Level of the environment (qa, uat, production, etc.)
-        collectionName:
-          description: Name of the reference data collection to promote
-          type: string
     PromotionStyleExecuteRequest:
       type: object
       required:

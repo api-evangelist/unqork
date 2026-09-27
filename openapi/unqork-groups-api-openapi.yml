@@ -176,11 +176,8 @@ paths:
                 $ref: '#/components/schemas/Error'
 components:
   schemas:
-    GroupPost:
+    GroupPut:
       type: object
-      required:
-      - name
-      - type
       properties:
         name:
           type: string
@@ -214,8 +211,11 @@ components:
         message:
           description: Error message
           type: string
-    GroupPut:
+    GroupPost:
       type: object
+      required:
+      - name
+      - type
       properties:
         name:
           type: string

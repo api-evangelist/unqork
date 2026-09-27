@@ -55,7 +55,7 @@ tags:
 - Enterprise Software
 - Platform-as-a-Service
 - Workflows
-- Financial-Services
+- Financial Services
 - Insurance
 - Government
 - Application Modernization
@@ -71,6 +71,7 @@ tags_raw:
 - Insurance
 - Government
 - Application Modernization
+- Financial-Services
 apis:
 - aid: unqork:unqork-applications-api
   name: Unqork Applications API
