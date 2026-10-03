@@ -180,23 +180,6 @@ components:
         serverSideOnly:
           type: boolean
           description: Whether the global variable is available server side only
-    GlobalVariablePost:
-      type: object
-      required:
-      - key
-      properties:
-        key:
-          type: string
-          description: Name of the key of the global variable
-        value:
-          type: string
-          description: Value of the key of the global variable
-        description:
-          type: string
-          description: Description for the global variable
-        serverSideOnly:
-          type: boolean
-          description: Whether the global variable is available server side only
     Error:
       type: object
       description: Error
@@ -218,6 +201,23 @@ components:
         message:
           description: Error message
           type: string
+    GlobalVariablePost:
+      type: object
+      required:
+      - key
+      properties:
+        key:
+          type: string
+          description: Name of the key of the global variable
+        value:
+          type: string
+          description: Value of the key of the global variable
+        description:
+          type: string
+          description: Description for the global variable
+        serverSideOnly:
+          type: boolean
+          description: Whether the global variable is available server side only
     GlobalVariable:
       type: object
       properties:

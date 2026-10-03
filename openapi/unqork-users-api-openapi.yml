@@ -272,56 +272,27 @@ paths:
                 $ref: '#/components/schemas/Error'
 components:
   schemas:
-    UserPost:
+    Error:
       type: object
+      description: Error
       required:
-      - name
-      - email
+      - code
+      - message
       properties:
-        userId:
+        code:
+          description: HTTP status code
+          type: integer
+          format: int32
+          enum:
+          - 400
+          - 401
+          - 403
+          - 404
+          - 412
+          - 500
+        message:
+          description: Error message
           type: string
-          description: The userId can only include letters, numbers, and the following characters @,+-_.
-        name:
-          type: string
-          description: The name can only include letters, numbers, and the following characters @,+-_.'
-        email:
-          type: string
-          maxLength: 254
-          format: email
-          description: Quotes and special characters `"(),:;<>@[]\` are not allowed. The local portion of the email (e.g. local@domain.com) must be > 0 characters and < 64 charaters. There cannot be consecutive dots (e.g. `..`) in the email
-        phone:
-          type: string
-          description: Must be a valid US phone number unless the country code is specified, in which case it is validated with [libphonenumber-js](https://gitlab.com/catamphetamine/libphonenumber-js#definitions)
-        role:
-          type: string
-          description: One of the roles configured in Unqork
-          default: Authenticated
-          deprecated: true
-        expressRoles:
-          type: array
-          items:
-            type: string
-          description: Express roles configured in Unqork
-          default:
-          - Authenticated
-        groups:
-          type: array
-          items:
-            type: string
-          description: List of groups configured in Unqork OR comma-separated list of groups configured in Unqork (e.g. "group1,group2")
-          default: []
-        applicationRoles:
-          type: object
-          description: Map of applications to roles OR comma-separated list of application-role mappings (e.g. "application1:role1,application2:role2")
-        password:
-          type: string
-          format: password
-        isServiceUser:
-          type: boolean
-          format: true/false
-        '...customAttributes':
-          type: string
-          description: Custom attributes can be included as additional keys in the request body. Only string values of custom attributes are supported.
     UserResponse:
       type: object
       required:
@@ -375,27 +346,6 @@ components:
         '...customAttributes':
           type: string
           description: Custom attributes will be included as additional keys in the response body.
-    Error:
-      type: object
-      description: Error
-      required:
-      - code
-      - message
-      properties:
-        code:
-          description: HTTP status code
-          type: integer
-          format: int32
-          enum:
-          - 400
-          - 401
-          - 403
-          - 404
-          - 412
-          - 500
-        message:
-          description: Error message
-          type: string
     UserPut:
       type: object
       properties:
@@ -430,6 +380,56 @@ components:
           items:
             type: string
           description: List of groups configured in Unqork OR comma-separated list of groups configured in Unqork (e.g. "group1,group2")
+        applicationRoles:
+          type: object
+          description: Map of applications to roles OR comma-separated list of application-role mappings (e.g. "application1:role1,application2:role2")
+        password:
+          type: string
+          format: password
+        isServiceUser:
+          type: boolean
+          format: true/false
+        '...customAttributes':
+          type: string
+          description: Custom attributes can be included as additional keys in the request body. Only string values of custom attributes are supported.
+    UserPost:
+      type: object
+      required:
+      - name
+      - email
+      properties:
+        userId:
+          type: string
+          description: The userId can only include letters, numbers, and the following characters @,+-_.
+        name:
+          type: string
+          description: The name can only include letters, numbers, and the following characters @,+-_.'
+        email:
+          type: string
+          maxLength: 254
+          format: email
+          description: Quotes and special characters `"(),:;<>@[]\` are not allowed. The local portion of the email (e.g. local@domain.com) must be > 0 characters and < 64 charaters. There cannot be consecutive dots (e.g. `..`) in the email
+        phone:
+          type: string
+          description: Must be a valid US phone number unless the country code is specified, in which case it is validated with [libphonenumber-js](https://gitlab.com/catamphetamine/libphonenumber-js#definitions)
+        role:
+          type: string
+          description: One of the roles configured in Unqork
+          default: Authenticated
+          deprecated: true
+        expressRoles:
+          type: array
+          items:
+            type: string
+          description: Express roles configured in Unqork
+          default:
+          - Authenticated
+        groups:
+          type: array
+          items:
+            type: string
+          description: List of groups configured in Unqork OR comma-separated list of groups configured in Unqork (e.g. "group1,group2")
+          default: []
         applicationRoles:
           type: object
           description: Map of applications to roles OR comma-separated list of application-role mappings (e.g. "application1:role1,application2:role2")

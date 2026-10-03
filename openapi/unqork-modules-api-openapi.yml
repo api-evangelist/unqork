@@ -467,124 +467,6 @@ paths:
                 $ref: '#/components/schemas/Error'
 components:
   schemas:
-    ExecutionError:
-      type: object
-      properties:
-        type:
-          type: string
-        url:
-          type: string
-        component:
-          type: string
-        message:
-          type: string
-        code:
-          type: integer
-    Error:
-      type: object
-      description: Error
-      required:
-      - code
-      - message
-      properties:
-        code:
-          description: HTTP status code
-          type: integer
-          format: int32
-          enum:
-          - 400
-          - 401
-          - 403
-          - 404
-          - 412
-          - 500
-        message:
-          description: Error message
-          type: string
-    InvalidNavigationPanels:
-      type: array
-      items:
-        type: object
-        properties:
-          key:
-            type: string
-          label:
-            type: string
-    ModuleResponse:
-      type: object
-      required:
-      - id
-      - name
-      - title
-      - created
-      - modified
-      properties:
-        id:
-          type: string
-        name:
-          type: string
-        title:
-          type: string
-        created:
-          type: string
-          format: date-time
-        modified:
-          type: string
-          format: date-time
-    ModuleExecuteRequest:
-      type: object
-      properties:
-        submissionId:
-          description: ID of module submission to use. If `submissionId` is unspecified and `save` is specified, a new submission will be created with `moduleId` as the module being executed and `userId` as the user making the request.
-          type: string
-        data:
-          description: Raw data to include in submission data when executing (and saving, if specified).
-          type: object
-        metadata:
-          $ref: '#/components/schemas/MetadataRequest'
-        validate:
-          description: Whether or not to validate submission data post-execution.
-          type: boolean
-          default: false
-        save:
-          description: Whether to save data for the existing submission (or create a new submission) after execution. Data will never be saved when an execution error is encountered.
-          type: boolean
-          default: false
-        saveOnValidationError:
-          description: If set to `true` (and both save and validate are also set to `true`), will save and send back a 2xx response, even if validation errors occurred.
-          type: boolean
-          default: false
-        hydrateDataInitially:
-          description: If set to `true`, will fully populate data object before module begins execution.
-          type: boolean
-          default: false
-    ValidationErrors:
-      type: array
-      items:
-        type: object
-        properties:
-          id:
-            type: string
-          path:
-            type: string
-          label:
-            type: string
-          parent:
-            type: string
-          message:
-            type: string
-    MetadataRequest:
-      type: object
-      description: 'Object containing key-value pairs. To set nested values, this must be an object like `{"statuses.complete": "yes", "statuses.processed": "no"}`, which is MongoDB [dot notation](https://docs.mongodb.com/manual/core/document/#dot-notation).'
-    FailedExecuteResponse:
-      type: object
-      properties:
-        validationErrors:
-          $ref: '#/components/schemas/ValidationErrors'
-        invalidNavigationPanels:
-          $ref: '#/components/schemas/InvalidNavigationPanels'
-        executionError:
-          $ref: '#/components/schemas/ExecutionError'
     ModuleExecuteResponse:
       type: object
       properties:
@@ -620,6 +502,124 @@ components:
           $ref: '#/components/schemas/ValidationErrors'
         invalidNavigationPanels:
           $ref: '#/components/schemas/InvalidNavigationPanels'
+    Error:
+      type: object
+      description: Error
+      required:
+      - code
+      - message
+      properties:
+        code:
+          description: HTTP status code
+          type: integer
+          format: int32
+          enum:
+          - 400
+          - 401
+          - 403
+          - 404
+          - 412
+          - 500
+        message:
+          description: Error message
+          type: string
+    FailedExecuteResponse:
+      type: object
+      properties:
+        validationErrors:
+          $ref: '#/components/schemas/ValidationErrors'
+        invalidNavigationPanels:
+          $ref: '#/components/schemas/InvalidNavigationPanels'
+        executionError:
+          $ref: '#/components/schemas/ExecutionError'
+    ModuleExecuteRequest:
+      type: object
+      properties:
+        submissionId:
+          description: ID of module submission to use. If `submissionId` is unspecified and `save` is specified, a new submission will be created with `moduleId` as the module being executed and `userId` as the user making the request.
+          type: string
+        data:
+          description: Raw data to include in submission data when executing (and saving, if specified).
+          type: object
+        metadata:
+          $ref: '#/components/schemas/MetadataRequest'
+        validate:
+          description: Whether or not to validate submission data post-execution.
+          type: boolean
+          default: false
+        save:
+          description: Whether to save data for the existing submission (or create a new submission) after execution. Data will never be saved when an execution error is encountered.
+          type: boolean
+          default: false
+        saveOnValidationError:
+          description: If set to `true` (and both save and validate are also set to `true`), will save and send back a 2xx response, even if validation errors occurred.
+          type: boolean
+          default: false
+        hydrateDataInitially:
+          description: If set to `true`, will fully populate data object before module begins execution.
+          type: boolean
+          default: false
+    MetadataRequest:
+      type: object
+      description: 'Object containing key-value pairs. To set nested values, this must be an object like `{"statuses.complete": "yes", "statuses.processed": "no"}`, which is MongoDB [dot notation](https://docs.mongodb.com/manual/core/document/#dot-notation).'
+    InvalidNavigationPanels:
+      type: array
+      items:
+        type: object
+        properties:
+          key:
+            type: string
+          label:
+            type: string
+    ModuleResponse:
+      type: object
+      required:
+      - id
+      - name
+      - title
+      - created
+      - modified
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        title:
+          type: string
+        created:
+          type: string
+          format: date-time
+        modified:
+          type: string
+          format: date-time
+    ValidationErrors:
+      type: array
+      items:
+        type: object
+        properties:
+          id:
+            type: string
+          path:
+            type: string
+          label:
+            type: string
+          parent:
+            type: string
+          message:
+            type: string
+    ExecutionError:
+      type: object
+      properties:
+        type:
+          type: string
+        url:
+          type: string
+        component:
+          type: string
+        message:
+          type: string
+        code:
+          type: integer
   parameters:
     Limit:
       name: limit
