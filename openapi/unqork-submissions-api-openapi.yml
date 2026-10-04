@@ -724,57 +724,11 @@ components:
         - 1
         - -1
         default: 1
-    Limit:
-      name: limit
-      in: query
-      description: Maximum number of results to return (default 50, maximum 50)
-      required: false
-      schema:
-        type: integer
-        format: int32
-        default: 50
-        maximum: 50
-    DataFields:
-      name: dataFields
-      in: query
-      description: 'Comma-separated list of dot-notation `data` fields to retrieve; for example, `&dataFields=field1,also.field2` will retrieve `{"data":{"field1":"v1","also":{"field2":"v2"}}}`. Do not include "data" in front of each field. All other submission fields will always be retrieved.
-
-        '
-      schema:
-        type: string
-    IncludeDeleted:
-      name: includeDeleted
-      in: query
-      description: Whether to include deleted objects in response
-      required: false
-      schema:
-        type: boolean
-        default: false
-    MetadataFilterString:
-      name: metadataFilter
-      in: query
-      description: "Filter condition against submission \"metadata\" field. Value must be a stringified MongoDB query condition (see Examples, below). MongoDB [dot notation](https://docs.mongodb.com/manual/core/document/#dot-notation) is supported for keys.\n\nNOTE: MongoDB selectors that can be nested inside queries (such as [Comparison](https://docs.mongodb.com/manual/reference/operator/query/#comparison) and [Element](https://docs.mongodb.com/manual/reference/operator/query/#element) Selectors, e.g. `$eq`, `$in`, `$exists`) are supported. The following [Logical](https://docs.mongodb.com/manual/reference/operator/query/#logical) Selectors are also supported: `$and`, `$or`, `$nor`\n\nExamples:\n- `metadataFilter: {\"checkpoints.complete\": 1234}`\n- `metadataFilter: {\"checkpoints.complete\": {\"$exists\": true}, \"checkpoints.processed\": {\"$exists\": false}}`\n\n  - Will return submissions where both `metadata.checkpoints.complete` exists AND `metadata.checkpoints.processed` does not exist\n"
-      schema:
-        type: string
     SubmissionSortBy:
       name: sortBy
       in: query
       description: Field to sort by (currently supported - `"created"`, `"modified"`)
       required: false
-      schema:
-        type: string
-    WorkflowID:
-      name: workflowId
-      in: path
-      description: Unique workflow ID
-      required: true
-      schema:
-        type: string
-    ModuleID:
-      name: moduleId
-      in: path
-      description: Unique module ID
-      required: true
       schema:
         type: string
     Offset:
@@ -786,108 +740,53 @@ components:
         type: integer
         format: int32
         default: 0
+    Limit:
+      name: limit
+      in: query
+      description: Maximum number of results to return (default 50, maximum 50)
+      required: false
+      schema:
+        type: integer
+        format: int32
+        default: 50
+        maximum: 50
+    ModuleID:
+      name: moduleId
+      in: path
+      description: Unique module ID
+      required: true
+      schema:
+        type: string
+    MetadataFilterString:
+      name: metadataFilter
+      in: query
+      description: "Filter condition against submission \"metadata\" field. Value must be a stringified MongoDB query condition (see Examples, below). MongoDB [dot notation](https://docs.mongodb.com/manual/core/document/#dot-notation) is supported for keys.\n\nNOTE: MongoDB selectors that can be nested inside queries (such as [Comparison](https://docs.mongodb.com/manual/reference/operator/query/#comparison) and [Element](https://docs.mongodb.com/manual/reference/operator/query/#element) Selectors, e.g. `$eq`, `$in`, `$exists`) are supported. The following [Logical](https://docs.mongodb.com/manual/reference/operator/query/#logical) Selectors are also supported: `$and`, `$or`, `$nor`\n\nExamples:\n- `metadataFilter: {\"checkpoints.complete\": 1234}`\n- `metadataFilter: {\"checkpoints.complete\": {\"$exists\": true}, \"checkpoints.processed\": {\"$exists\": false}}`\n\n  - Will return submissions where both `metadata.checkpoints.complete` exists AND `metadata.checkpoints.processed` does not exist\n"
+      schema:
+        type: string
+    DataFields:
+      name: dataFields
+      in: query
+      description: 'Comma-separated list of dot-notation `data` fields to retrieve; for example, `&dataFields=field1,also.field2` will retrieve `{"data":{"field1":"v1","also":{"field2":"v2"}}}`. Do not include "data" in front of each field. All other submission fields will always be retrieved.
+
+        '
+      schema:
+        type: string
+    WorkflowID:
+      name: workflowId
+      in: path
+      description: Unique workflow ID
+      required: true
+      schema:
+        type: string
+    IncludeDeleted:
+      name: includeDeleted
+      in: query
+      description: Whether to include deleted objects in response
+      required: false
+      schema:
+        type: boolean
+        default: false
   schemas:
-    MetadataFilter:
-      description: "Filter condition against submission \"metadata\" field. Value must be a MongoDB query condition (see Examples, below). MongoDB [dot notation](https://docs.mongodb.com/manual/core/document/#dot-notation) is supported for keys.\n\nNOTE: MongoDB selectors that can be nested inside queries (such as [Comparison](https://docs.mongodb.com/manual/reference/operator/query/#comparison) and [Element](https://docs.mongodb.com/manual/reference/operator/query/#element) Selectors, e.g. `$eq`, `$in`, `$exists`) are supported. The following [Logical](https://docs.mongodb.com/manual/reference/operator/query/#logical) Selectors are also supported: `$and`, `$or`, `$nor`\n\nExamples:\n- `metadataFilter: {\"checkpoints.complete\": 1234}`\n- `metadataFilter: {\"checkpoints.complete\": {\"$exists\": true}, \"checkpoints.processed\": {\"$exists\": false}}`\n\n  - Will return submissions where both `metadata.checkpoints.complete` exists AND `metadata.checkpoints.processed` does not exist\n"
-      type: object
-    ValidationErrors:
-      type: array
-      items:
-        type: object
-        properties:
-          id:
-            type: string
-          path:
-            type: string
-          label:
-            type: string
-          parent:
-            type: string
-          message:
-            type: string
-    RetrievedSubmissionResponse:
-      type: object
-      required:
-      - id
-      - moduleId
-      - created
-      - modified
-      - data
-      properties:
-        id:
-          type: string
-        userId:
-          type: string
-          description: Submission owner
-        moduleId:
-          type: string
-        created:
-          type: string
-          format: date-time
-        modified:
-          type: string
-          format: date-time
-        deleted:
-          type: string
-          format: date-time
-        data:
-          type: object
-          description: Transformed output data
-          properties:
-            format:
-              type: string
-              enum:
-              - json
-              - xml
-              - pdf
-            jsonData:
-              type: object
-            xmlData:
-              type: string
-            pdfUrl:
-              type: string
-              format: url
-            pdfData:
-              type: string
-            rawData:
-              type: object
-        metadata:
-          type: object
-        validationErrors:
-          $ref: '#/components/schemas/ValidationErrors'
-    Error:
-      type: object
-      description: Error
-      required:
-      - code
-      - message
-      properties:
-        code:
-          description: HTTP status code
-          type: integer
-          format: int32
-          enum:
-          - 400
-          - 401
-          - 403
-          - 404
-          - 412
-          - 500
-        message:
-          description: Error message
-          type: string
-    UpdatedSubmissionsResponse:
-      type: array
-      items:
-        type: object
-        properties:
-          id:
-            type: string
-          status:
-            type: integer
-          message:
-            type: string
-            description: Failure message
     UpdatedSubmissionRequest:
       type: object
       properties:
@@ -912,22 +811,111 @@ components:
         unsetMetadata:
           type: object
           description: Object containing metadata keys that should be deleted (e.g. `{"unsetMetadata":{"key.one":"","key.two":""}}`)
-    NewSubmissionRequest:
+    MetadataRequest:
       type: object
-      required:
-      - data
-      properties:
-        userId:
-          type: string
-          description: Submission owner
-        data:
-          type: object
-          description: Raw input data
-        metadata:
-          $ref: '#/components/schemas/MetadataRequest'
+      description: 'Object containing key-value pairs. To set nested values, this must be an object like `{"statuses.complete": "yes", "statuses.processed": "no"}`, which is MongoDB [dot notation](https://docs.mongodb.com/manual/core/document/#dot-notation).'
     DataFilter:
       description: "Filter condition against submission \"data\" field. Value must be a MongoDB query condition (see Examples, below).\n\nNOTE: MongoDB selectors that can be nested inside queries (such as [Comparison](https://docs.mongodb.com/manual/reference/operator/query/#comparison) and [Element](https://docs.mongodb.com/manual/reference/operator/query/#element) Selectors, e.g. `$eq`, `$in`, `$exists`) are supported. The following [Logical](https://docs.mongodb.com/manual/reference/operator/query/#logical) Selectors are also supported: `$and`, `$or`, `$nor`\n\nExamples:\n- `dataFilter: {\"age\": 30}`\n- `dataFilter: {\"age\": {\"$gt\": 30}, \"people.1.gender\": \"male\"}`\n\n  - Will match submission where age > 30 and gender for the 2nd people element equals \"male\"\n"
       type: object
+    RetrievedSubmissionMergeResponse:
+      type: object
+      required:
+      - id
+      - form
+      - created
+      - modified
+      - data
+      properties:
+        id:
+          type: string
+        owner:
+          type: string
+          description: Submission owner
+        form:
+          type: string
+        created:
+          type: string
+          format: date-time
+        modified:
+          type: string
+          format: date-time
+        deleted:
+          type: string
+          format: date-time
+        isRevision:
+          type: boolean
+        formArchive:
+          type: string
+          description: The form version the revision was saved under
+        data:
+          type: object
+          description: Transformed output data
+          properties:
+            format:
+              type: string
+              enum:
+              - json
+              - xml
+              - pdf
+            jsonData:
+              type: object
+            xmlData:
+              type: string
+            pdfUrl:
+              type: string
+              format: url
+            pdfData:
+              type: string
+            rawData:
+              type: object
+        conflicts:
+          type: array
+          items:
+            example:
+            - feildA
+            - feildB
+        validationErrors:
+          $ref: '#/components/schemas/ValidationErrors'
+    ValidationErrors:
+      type: array
+      items:
+        type: object
+        properties:
+          id:
+            type: string
+          path:
+            type: string
+          label:
+            type: string
+          parent:
+            type: string
+          message:
+            type: string
+    UpdateSubmissionsRequest:
+      type: array
+      items:
+        type: object
+        properties:
+          id:
+            type: string
+          data:
+            type: object
+            description: Raw input data
+          dataFilter:
+            $ref: '#/components/schemas/DataFilter'
+          incrementData:
+            type: object
+            description: Object containing data keys that should be incremented, and by what number (e.g. `{"incrementData":{"key1":1,"key2":10}}`)
+          unsetData:
+            type: object
+            description: Object containing data keys that should be deleted (e.g. `{"unsetData":{"key1":"","key2":""}}`)
+          metadata:
+            $ref: '#/components/schemas/MetadataRequest'
+          metadataFilter:
+            $ref: '#/components/schemas/MetadataFilter'
+          unsetMetadata:
+            type: object
+            description: Object containing metadata keys that should be deleted (e.g. `{"unsetMetadata":{"key.one":"","key.two":""}}`)
     WorkflowUpdateSubmissionRequest:
       type: object
       properties:
@@ -1010,6 +998,27 @@ components:
                     type: string
                   time:
                     type: string
+    Error:
+      type: object
+      description: Error
+      required:
+      - code
+      - message
+      properties:
+        code:
+          description: HTTP status code
+          type: integer
+          format: int32
+          enum:
+          - 400
+          - 401
+          - 403
+          - 404
+          - 412
+          - 500
+        message:
+          description: Error message
+          type: string
     SavedSubmissionResponse:
       type: object
       required:
@@ -1044,49 +1053,49 @@ components:
           type: object
         validationErrors:
           $ref: '#/components/schemas/ValidationErrors'
-    MetadataRequest:
+    NewSubmissionRequest:
       type: object
-      description: 'Object containing key-value pairs. To set nested values, this must be an object like `{"statuses.complete": "yes", "statuses.processed": "no"}`, which is MongoDB [dot notation](https://docs.mongodb.com/manual/core/document/#dot-notation).'
-    UpdateSubmissionsRequest:
+      required:
+      - data
+      properties:
+        userId:
+          type: string
+          description: Submission owner
+        data:
+          type: object
+          description: Raw input data
+        metadata:
+          $ref: '#/components/schemas/MetadataRequest'
+    UpdatedSubmissionsResponse:
       type: array
       items:
         type: object
         properties:
           id:
             type: string
-          data:
-            type: object
-            description: Raw input data
-          dataFilter:
-            $ref: '#/components/schemas/DataFilter'
-          incrementData:
-            type: object
-            description: Object containing data keys that should be incremented, and by what number (e.g. `{"incrementData":{"key1":1,"key2":10}}`)
-          unsetData:
-            type: object
-            description: Object containing data keys that should be deleted (e.g. `{"unsetData":{"key1":"","key2":""}}`)
-          metadata:
-            $ref: '#/components/schemas/MetadataRequest'
-          metadataFilter:
-            $ref: '#/components/schemas/MetadataFilter'
-          unsetMetadata:
-            type: object
-            description: Object containing metadata keys that should be deleted (e.g. `{"unsetMetadata":{"key.one":"","key.two":""}}`)
-    RetrievedSubmissionMergeResponse:
+          status:
+            type: integer
+          message:
+            type: string
+            description: Failure message
+    MetadataFilter:
+      description: "Filter condition against submission \"metadata\" field. Value must be a MongoDB query condition (see Examples, below). MongoDB [dot notation](https://docs.mongodb.com/manual/core/document/#dot-notation) is supported for keys.\n\nNOTE: MongoDB selectors that can be nested inside queries (such as [Comparison](https://docs.mongodb.com/manual/reference/operator/query/#comparison) and [Element](https://docs.mongodb.com/manual/reference/operator/query/#element) Selectors, e.g. `$eq`, `$in`, `$exists`) are supported. The following [Logical](https://docs.mongodb.com/manual/reference/operator/query/#logical) Selectors are also supported: `$and`, `$or`, `$nor`\n\nExamples:\n- `metadataFilter: {\"checkpoints.complete\": 1234}`\n- `metadataFilter: {\"checkpoints.complete\": {\"$exists\": true}, \"checkpoints.processed\": {\"$exists\": false}}`\n\n  - Will return submissions where both `metadata.checkpoints.complete` exists AND `metadata.checkpoints.processed` does not exist\n"
+      type: object
+    RetrievedSubmissionResponse:
       type: object
       required:
       - id
-      - form
+      - moduleId
       - created
       - modified
       - data
       properties:
         id:
           type: string
-        owner:
+        userId:
           type: string
           description: Submission owner
-        form:
+        moduleId:
           type: string
         created:
           type: string
@@ -1097,11 +1106,6 @@ components:
         deleted:
           type: string
           format: date-time
-        isRevision:
-          type: boolean
-        formArchive:
-          type: string
-          description: The form version the revision was saved under
         data:
           type: object
           description: Transformed output data
@@ -1123,12 +1127,8 @@ components:
               type: string
             rawData:
               type: object
-        conflicts:
-          type: array
-          items:
-            example:
-            - feildA
-            - feildB
+        metadata:
+          type: object
         validationErrors:
           $ref: '#/components/schemas/ValidationErrors'
   securitySchemes:

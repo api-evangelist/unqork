@@ -86,6 +86,25 @@ components:
       schema:
         type: string
   schemas:
+    ModelRecord:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Id of Model Record
+        data:
+          type: object
+          description: Data Model data stored in Model Record
+        owner:
+          type: string
+          description: Owner of Data Model Record
+        created:
+          type: string
+          description: Timestamp of Model Record creation
+        archived:
+          type: boolean
+          default: false
+          description: Whether or not the Model Record has been archived
     Error:
       type: object
       description: Error
@@ -107,25 +126,6 @@ components:
         message:
           description: Error message
           type: string
-    ModelRecord:
-      type: object
-      properties:
-        id:
-          type: string
-          description: Id of Model Record
-        data:
-          type: object
-          description: Data Model data stored in Model Record
-        owner:
-          type: string
-          description: Owner of Data Model Record
-        created:
-          type: string
-          description: Timestamp of Model Record creation
-        archived:
-          type: boolean
-          default: false
-          description: Whether or not the Model Record has been archived
     ArrayOfModelRecords:
       type: array
       items:

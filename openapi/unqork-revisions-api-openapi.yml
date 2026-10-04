@@ -219,13 +219,25 @@ paths:
                 $ref: '#/components/schemas/Error'
 components:
   parameters:
-    ModuleID:
-      name: moduleId
-      in: path
-      description: Unique module ID
-      required: true
+    Offset:
+      name: offset
+      in: query
+      description: Number of results to skip before selecting results. Offset is zero based.
+      required: false
       schema:
-        type: string
+        type: integer
+        format: int32
+        default: 0
+    Limit:
+      name: limit
+      in: query
+      description: Maximum number of results to return (default 50, maximum 50)
+      required: false
+      schema:
+        type: integer
+        format: int32
+        default: 50
+        maximum: 50
     SubmissionSortOrder:
       name: sortOrder
       in: query
@@ -237,6 +249,21 @@ components:
         - 1
         - -1
         default: 1
+    ModuleID:
+      name: moduleId
+      in: path
+      description: Unique module ID
+      required: true
+      schema:
+        type: string
+    DataFields:
+      name: dataFields
+      in: query
+      description: 'Comma-separated list of dot-notation `data` fields to retrieve; for example, `&dataFields=field1,also.field2` will retrieve `{"data":{"field1":"v1","also":{"field2":"v2"}}}`. Do not include "data" in front of each field. All other submission fields will always be retrieved.
+
+        '
+      schema:
+        type: string
     MetadataFilterString:
       name: metadataFilter
       in: query
@@ -250,16 +277,6 @@ components:
       required: false
       schema:
         type: string
-    Limit:
-      name: limit
-      in: query
-      description: Maximum number of results to return (default 50, maximum 50)
-      required: false
-      schema:
-        type: integer
-        format: int32
-        default: 50
-        maximum: 50
     WorkflowID:
       name: workflowId
       in: path
@@ -267,24 +284,67 @@ components:
       required: true
       schema:
         type: string
-    Offset:
-      name: offset
-      in: query
-      description: Number of results to skip before selecting results. Offset is zero based.
-      required: false
-      schema:
-        type: integer
-        format: int32
-        default: 0
-    DataFields:
-      name: dataFields
-      in: query
-      description: 'Comma-separated list of dot-notation `data` fields to retrieve; for example, `&dataFields=field1,also.field2` will retrieve `{"data":{"field1":"v1","also":{"field2":"v2"}}}`. Do not include "data" in front of each field. All other submission fields will always be retrieved.
-
-        '
-      schema:
-        type: string
   schemas:
+    RetrievedRevisionsResponse:
+      type: object
+      required:
+      - id
+      - submission
+      properties:
+        id:
+          type: string
+          description: Revision id
+        created:
+          type: string
+          description: Date of when the submission was created or modified (might be missing in old submissions)
+        createdBy:
+          type: string
+          description: Creator or modifier of the submission (might be missing in old submissions)
+        persistedInWormStorage:
+          type: boolean
+          description: whether the revision is WORM (Write-Once-Read-Many) compliant. [Click here](https://www.17a-4.com/regulations-summary/) for more information
+        submission:
+          type: object
+          description: Submission object
+          properties:
+            id:
+              type: string
+            userId:
+              type: string
+              description: Submission owner
+            formId:
+              type: string
+            created:
+              type: string
+              format: date-time
+            modified:
+              type: string
+              format: date-time
+            deleted:
+              type: string
+              format: date-time
+            metadata:
+              type: object
+            formArchive:
+              type: string
+              description: The form version the revision was saved under
+        validationErrors:
+          $ref: '#/components/schemas/ValidationErrors'
+    ValidationErrors:
+      type: array
+      items:
+        type: object
+        properties:
+          id:
+            type: string
+          path:
+            type: string
+          label:
+            type: string
+          parent:
+            type: string
+          message:
+            type: string
     Error:
       type: object
       description: Error
@@ -370,66 +430,6 @@ components:
                   type: string
                 rawData:
                   type: object
-        validationErrors:
-          $ref: '#/components/schemas/ValidationErrors'
-    ValidationErrors:
-      type: array
-      items:
-        type: object
-        properties:
-          id:
-            type: string
-          path:
-            type: string
-          label:
-            type: string
-          parent:
-            type: string
-          message:
-            type: string
-    RetrievedRevisionsResponse:
-      type: object
-      required:
-      - id
-      - submission
-      properties:
-        id:
-          type: string
-          description: Revision id
-        created:
-          type: string
-          description: Date of when the submission was created or modified (might be missing in old submissions)
-        createdBy:
-          type: string
-          description: Creator or modifier of the submission (might be missing in old submissions)
-        persistedInWormStorage:
-          type: boolean
-          description: whether the revision is WORM (Write-Once-Read-Many) compliant. [Click here](https://www.17a-4.com/regulations-summary/) for more information
-        submission:
-          type: object
-          description: Submission object
-          properties:
-            id:
-              type: string
-            userId:
-              type: string
-              description: Submission owner
-            formId:
-              type: string
-            created:
-              type: string
-              format: date-time
-            modified:
-              type: string
-              format: date-time
-            deleted:
-              type: string
-              format: date-time
-            metadata:
-              type: object
-            formArchive:
-              type: string
-              description: The form version the revision was saved under
         validationErrors:
           $ref: '#/components/schemas/ValidationErrors'
   securitySchemes:

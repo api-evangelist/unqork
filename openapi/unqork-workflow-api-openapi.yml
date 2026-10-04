@@ -368,6 +368,59 @@ paths:
                 $ref: '#/components/schemas/Error'
 components:
   schemas:
+    InvalidNavigationPanels:
+      type: array
+      items:
+        type: object
+        properties:
+          key:
+            type: string
+          label:
+            type: string
+    HandoffSubmissionToWorkflowRequest:
+      type: object
+      required:
+      - submissionId
+      properties:
+        submissionId:
+          type: string
+          description: ID of submission to use.
+        startNode:
+          type: string
+          description: Path of the start node in handoff workflow. Default start node will be used when startNode is not provided.
+    FailedResumeWorkflowResponse:
+      type: object
+      description: Resume Workflow Validation and/or execution error
+      properties:
+        submissionId:
+          type: string
+          description: ID of submission
+        state:
+          type: string
+          description: Current state of the submission
+        statusCode:
+          description: Error codes or custom http status codes if returned for api modules
+          type: integer
+          format: int32
+          enum:
+          - 400
+          - 401
+          - 403
+          - 404
+          - 412
+          - 500
+        message:
+          description: Error message
+          type: string
+        formattedError:
+          type: object
+          properties:
+            validationErrors:
+              $ref: '#/components/schemas/ValidationErrors'
+            invalidNavigationPanels:
+              $ref: '#/components/schemas/InvalidNavigationPanels'
+            executionError:
+              $ref: '#/components/schemas/ExecutionError'
     Error:
       type: object
       description: Error
@@ -389,6 +442,157 @@ components:
         message:
           description: Error message
           type: string
+    ExecutionError:
+      type: object
+      properties:
+        type:
+          type: string
+        url:
+          type: string
+        component:
+          type: string
+        message:
+          type: string
+        code:
+          type: integer
+    ResumeWorkflowRequest:
+      type: object
+      properties:
+        data:
+          description: Raw data to include in submission.
+          type: object
+    WorkflowStartRequest:
+      type: object
+      properties:
+        userId:
+          type: string
+          description: Submission owner
+        data:
+          description: Raw data to include in submission.
+          type: object
+    RetrievedTimerStartResponse:
+      type: object
+      description: List of timer start nodes and their statuses in a particular workflow
+      properties:
+        path:
+          type: string
+          description: workflow path
+        nodes:
+          type: array
+          items:
+            type: object
+            properties:
+              name:
+                type: string
+                description: timer start node name
+              path:
+                type: string
+                description: timer start node path
+              started:
+                type: boolean
+                description: whether a timer start node is active or not
+        statusCode:
+          type: integer
+          format: int32
+          enum:
+          - 200
+    ResumeWorkflowResponse:
+      type: object
+      properties:
+        submissionId:
+          type: string
+          description: ID of submission
+        state:
+          type: string
+          description: Current state of the submission
+        statusCode:
+          type: integer
+          format: int32
+          enum:
+          - 200
+        submission:
+          type: object
+          description: Submission data
+    ValidationErrors:
+      type: array
+      items:
+        type: object
+        properties:
+          id:
+            type: string
+          path:
+            type: string
+          label:
+            type: string
+          parent:
+            type: string
+          message:
+            type: string
+    HandoffSubmissionToWorkflowResponse:
+      type: object
+      properties:
+        submissionId:
+          type: string
+          description: ID of submission
+        workflowId:
+          type: string
+          description: ID of workflow after handoff
+        state:
+          type: string
+          description: Current state of the submission
+        statusCode:
+          type: integer
+          format: int32
+          enum:
+          - 200
+        submission:
+          type: object
+          description: Submission data
+    SavedSubmissionResponse:
+      type: object
+      required:
+      - id
+      - moduleId
+      - created
+      - modified
+      properties:
+        id:
+          type: string
+        userId:
+          type: string
+          description: Submission owner
+        moduleId:
+          type: string
+        created:
+          type: string
+          format: date-time
+        modified:
+          type: string
+          format: date-time
+        deleted:
+          type: string
+          format: date-time
+        data:
+          type: object
+          description: Raw output data
+          properties:
+            rawData:
+              type: object
+        metadata:
+          type: object
+        validationErrors:
+          $ref: '#/components/schemas/ValidationErrors'
+    WorkflowCreateSubmissionResponse:
+      type: object
+      properties:
+        submissionId:
+          type: string
+          description: ID of submission
+        submission:
+          $ref: '#/components/schemas/SavedSubmissionResponse'
+        statusCode:
+          type: integer
+          description: Error or success response code
     FailedHandoffSubmissionToWorkflowResponse:
       type: object
       description: Handoff Submission Workflow Validation and/or execution error
@@ -465,215 +669,11 @@ components:
             type: integer
             format: int32
             description: The calculated duration to wait before executing the action, in seconds
-    FailedResumeWorkflowResponse:
-      type: object
-      description: Resume Workflow Validation and/or execution error
-      properties:
-        submissionId:
-          type: string
-          description: ID of submission
-        state:
-          type: string
-          description: Current state of the submission
-        statusCode:
-          description: Error codes or custom http status codes if returned for api modules
-          type: integer
-          format: int32
-          enum:
-          - 400
-          - 401
-          - 403
-          - 404
-          - 412
-          - 500
-        message:
-          description: Error message
-          type: string
-        formattedError:
-          type: object
-          properties:
-            validationErrors:
-              $ref: '#/components/schemas/ValidationErrors'
-            invalidNavigationPanels:
-              $ref: '#/components/schemas/InvalidNavigationPanels'
-            executionError:
-              $ref: '#/components/schemas/ExecutionError'
-    ValidationErrors:
-      type: array
-      items:
-        type: object
-        properties:
-          id:
-            type: string
-          path:
-            type: string
-          label:
-            type: string
-          parent:
-            type: string
-          message:
-            type: string
-    ResumeWorkflowResponse:
-      type: object
-      properties:
-        submissionId:
-          type: string
-          description: ID of submission
-        state:
-          type: string
-          description: Current state of the submission
-        statusCode:
-          type: integer
-          format: int32
-          enum:
-          - 200
-        submission:
-          type: object
-          description: Submission data
-    SavedSubmissionResponse:
-      type: object
-      required:
-      - id
-      - moduleId
-      - created
-      - modified
-      properties:
-        id:
-          type: string
-        userId:
-          type: string
-          description: Submission owner
-        moduleId:
-          type: string
-        created:
-          type: string
-          format: date-time
-        modified:
-          type: string
-          format: date-time
-        deleted:
-          type: string
-          format: date-time
-        data:
-          type: object
-          description: Raw output data
-          properties:
-            rawData:
-              type: object
-        metadata:
-          type: object
-        validationErrors:
-          $ref: '#/components/schemas/ValidationErrors'
-    ExecutionError:
-      type: object
-      properties:
-        type:
-          type: string
-        url:
-          type: string
-        component:
-          type: string
-        message:
-          type: string
-        code:
-          type: integer
-    HandoffSubmissionToWorkflowResponse:
-      type: object
-      properties:
-        submissionId:
-          type: string
-          description: ID of submission
-        workflowId:
-          type: string
-          description: ID of workflow after handoff
-        state:
-          type: string
-          description: Current state of the submission
-        statusCode:
-          type: integer
-          format: int32
-          enum:
-          - 200
-        submission:
-          type: object
-          description: Submission data
-    WorkflowCreateSubmissionResponse:
-      type: object
-      properties:
-        submissionId:
-          type: string
-          description: ID of submission
-        submission:
-          $ref: '#/components/schemas/SavedSubmissionResponse'
-        statusCode:
-          type: integer
-          description: Error or success response code
-    InvalidNavigationPanels:
-      type: array
-      items:
-        type: object
-        properties:
-          key:
-            type: string
-          label:
-            type: string
-    HandoffSubmissionToWorkflowRequest:
-      type: object
-      required:
-      - submissionId
-      properties:
-        submissionId:
-          type: string
-          description: ID of submission to use.
-        startNode:
-          type: string
-          description: Path of the start node in handoff workflow. Default start node will be used when startNode is not provided.
-    WorkflowStartRequest:
-      type: object
-      properties:
-        userId:
-          type: string
-          description: Submission owner
-        data:
-          description: Raw data to include in submission.
-          type: object
-    ResumeWorkflowRequest:
-      type: object
-      properties:
-        data:
-          description: Raw data to include in submission.
-          type: object
-    RetrievedTimerStartResponse:
-      type: object
-      description: List of timer start nodes and their statuses in a particular workflow
-      properties:
-        path:
-          type: string
-          description: workflow path
-        nodes:
-          type: array
-          items:
-            type: object
-            properties:
-              name:
-                type: string
-                description: timer start node name
-              path:
-                type: string
-                description: timer start node path
-              started:
-                type: boolean
-                description: whether a timer start node is active or not
-        statusCode:
-          type: integer
-          format: int32
-          enum:
-          - 200
   parameters:
-    TimerStartNodePath:
-      name: timerStartNodePath
+    StepPath:
+      name: stepPath
       in: path
-      description: Unique path of a timer start node in a workflow
+      description: Unique path of workflow step, usually "start"
       required: true
       schema:
         type: string
@@ -684,10 +684,10 @@ components:
       required: true
       schema:
         type: string
-    StepPath:
-      name: stepPath
+    TimerStartNodePath:
+      name: timerStartNodePath
       in: path
-      description: Unique path of workflow step, usually "start"
+      description: Unique path of a timer start node in a workflow
       required: true
       schema:
         type: string
