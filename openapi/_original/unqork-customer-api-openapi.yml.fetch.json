@@ -1,0 +1,12 @@
+{
+ "url": "https://developers.unqork.io/api/1.0/openapi.yml",
+ "requested_url": "https://developers.unqork.io/api/1.0/openapi.yml",
+ "status": 200,
+ "content_type": "binary/octet-stream",
+ "bytes": 202361,
+ "sha256": "aeeb446fa3044c7d8630fed427b9fddc5803fc477d29b904e7d00c3dc147901d",
+ "fetched_at": "2026-10-04",
+ "fetched_by": "APIEvangelist-Harvest/1.0 (+https://apievangelist.com)",
+ "match": "equivalent",
+ "note": "Re-fetched from the provider by verify-openapi-sources.py; the provider's current document describes the same operations (Jaccard 0.979), but the bytes differ, so the archive is an earlier or reformatted copy."
+}
