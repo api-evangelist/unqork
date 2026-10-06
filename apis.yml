@@ -46,7 +46,7 @@ x-tier: profiled
 x-tier-reason: enrichment-pipeline
 specificationVersion: '0.23'
 created: '2026-07-31'
-modified: '2026-07-31'
+modified: '2026-10-06'
 tags:
 - Company
 - No-Code
@@ -578,6 +578,8 @@ maintainers:
 - FN: APIs.json
   email: info@apis.io
 common:
+- url: https://unqork.com/resource-center/feed/
+  type: BlogRSS
 - type: Plans
   url: plans/unqork-plans-pricing.yml
 - type: CapabilityMap
