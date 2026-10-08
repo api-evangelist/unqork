@@ -578,6 +578,8 @@ maintainers:
 - FN: APIs.json
   email: info@apis.io
 common:
+- type: RateLimits
+  url: rate-limits/unqork-rate-limits.yml
 - url: https://unqork.com/resource-center/feed/
   type: BlogRSS
 - type: Plans
