@@ -1,0 +1,22 @@
+generated: '2026-10-13'
+method: searched
+checked:
+- https://aws.amazon.com/marketplace/
+marketplace_apps: []
+edges:
+- partner_name: AWS Marketplace
+  partner: amazon-web-services
+  partner_match: aggregator
+  type: marketplace
+  marketplace: aws-marketplace
+  channel: distribution
+  relationship: platform-app
+  direction: provider-built
+  evidence: https://aws.amazon.com/marketplace/seller-profile?id=3e7ebb4b-d5bb-411b-8a2f-4fe80146b3a1
+  listing_count: 2
+  apps:
+  - 'Unqork: The Leading Codeless as a Service Platform'
+  - Unqork Underwriting Workbench Accelerator
+  seller_name: Unqork
+  detected_by: sweep-cloud-marketplaces.py
+  detected: '2026-10-13'
