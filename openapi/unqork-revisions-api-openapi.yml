@@ -228,6 +228,13 @@ components:
         type: integer
         format: int32
         default: 0
+    SubmissionSortBy:
+      name: sortBy
+      in: query
+      description: Field to sort by (currently supported - `"created"`, `"modified"`)
+      required: false
+      schema:
+        type: string
     Limit:
       name: limit
       in: query
@@ -238,6 +245,27 @@ components:
         format: int32
         default: 50
         maximum: 50
+    WorkflowID:
+      name: workflowId
+      in: path
+      description: Unique workflow ID
+      required: true
+      schema:
+        type: string
+    MetadataFilterString:
+      name: metadataFilter
+      in: query
+      description: "Filter condition against submission \"metadata\" field. Value must be a stringified MongoDB query condition (see Examples, below). MongoDB [dot notation](https://docs.mongodb.com/manual/core/document/#dot-notation) is supported for keys.\n\nNOTE: MongoDB selectors that can be nested inside queries (such as [Comparison](https://docs.mongodb.com/manual/reference/operator/query/#comparison) and [Element](https://docs.mongodb.com/manual/reference/operator/query/#element) Selectors, e.g. `$eq`, `$in`, `$exists`) are supported. The following [Logical](https://docs.mongodb.com/manual/reference/operator/query/#logical) Selectors are also supported: `$and`, `$or`, `$nor`\n\nExamples:\n- `metadataFilter: {\"checkpoints.complete\": 1234}`\n- `metadataFilter: {\"checkpoints.complete\": {\"$exists\": true}, \"checkpoints.processed\": {\"$exists\": false}}`\n\n  - Will return submissions where both `metadata.checkpoints.complete` exists AND `metadata.checkpoints.processed` does not exist\n"
+      schema:
+        type: string
+    DataFields:
+      name: dataFields
+      in: query
+      description: 'Comma-separated list of dot-notation `data` fields to retrieve; for example, `&dataFields=field1,also.field2` will retrieve `{"data":{"field1":"v1","also":{"field2":"v2"}}}`. Do not include "data" in front of each field. All other submission fields will always be retrieved.
+
+        '
+      schema:
+        type: string
     SubmissionSortOrder:
       name: sortOrder
       in: query
@@ -256,80 +284,7 @@ components:
       required: true
       schema:
         type: string
-    DataFields:
-      name: dataFields
-      in: query
-      description: 'Comma-separated list of dot-notation `data` fields to retrieve; for example, `&dataFields=field1,also.field2` will retrieve `{"data":{"field1":"v1","also":{"field2":"v2"}}}`. Do not include "data" in front of each field. All other submission fields will always be retrieved.
-
-        '
-      schema:
-        type: string
-    MetadataFilterString:
-      name: metadataFilter
-      in: query
-      description: "Filter condition against submission \"metadata\" field. Value must be a stringified MongoDB query condition (see Examples, below). MongoDB [dot notation](https://docs.mongodb.com/manual/core/document/#dot-notation) is supported for keys.\n\nNOTE: MongoDB selectors that can be nested inside queries (such as [Comparison](https://docs.mongodb.com/manual/reference/operator/query/#comparison) and [Element](https://docs.mongodb.com/manual/reference/operator/query/#element) Selectors, e.g. `$eq`, `$in`, `$exists`) are supported. The following [Logical](https://docs.mongodb.com/manual/reference/operator/query/#logical) Selectors are also supported: `$and`, `$or`, `$nor`\n\nExamples:\n- `metadataFilter: {\"checkpoints.complete\": 1234}`\n- `metadataFilter: {\"checkpoints.complete\": {\"$exists\": true}, \"checkpoints.processed\": {\"$exists\": false}}`\n\n  - Will return submissions where both `metadata.checkpoints.complete` exists AND `metadata.checkpoints.processed` does not exist\n"
-      schema:
-        type: string
-    SubmissionSortBy:
-      name: sortBy
-      in: query
-      description: Field to sort by (currently supported - `"created"`, `"modified"`)
-      required: false
-      schema:
-        type: string
-    WorkflowID:
-      name: workflowId
-      in: path
-      description: Unique workflow ID
-      required: true
-      schema:
-        type: string
   schemas:
-    RetrievedRevisionsResponse:
-      type: object
-      required:
-      - id
-      - submission
-      properties:
-        id:
-          type: string
-          description: Revision id
-        created:
-          type: string
-          description: Date of when the submission was created or modified (might be missing in old submissions)
-        createdBy:
-          type: string
-          description: Creator or modifier of the submission (might be missing in old submissions)
-        persistedInWormStorage:
-          type: boolean
-          description: whether the revision is WORM (Write-Once-Read-Many) compliant. [Click here](https://www.17a-4.com/regulations-summary/) for more information
-        submission:
-          type: object
-          description: Submission object
-          properties:
-            id:
-              type: string
-            userId:
-              type: string
-              description: Submission owner
-            formId:
-              type: string
-            created:
-              type: string
-              format: date-time
-            modified:
-              type: string
-              format: date-time
-            deleted:
-              type: string
-              format: date-time
-            metadata:
-              type: object
-            formArchive:
-              type: string
-              description: The form version the revision was saved under
-        validationErrors:
-          $ref: '#/components/schemas/ValidationErrors'
     ValidationErrors:
       type: array
       items:
@@ -430,6 +385,51 @@ components:
                   type: string
                 rawData:
                   type: object
+        validationErrors:
+          $ref: '#/components/schemas/ValidationErrors'
+    RetrievedRevisionsResponse:
+      type: object
+      required:
+      - id
+      - submission
+      properties:
+        id:
+          type: string
+          description: Revision id
+        created:
+          type: string
+          description: Date of when the submission was created or modified (might be missing in old submissions)
+        createdBy:
+          type: string
+          description: Creator or modifier of the submission (might be missing in old submissions)
+        persistedInWormStorage:
+          type: boolean
+          description: whether the revision is WORM (Write-Once-Read-Many) compliant. [Click here](https://www.17a-4.com/regulations-summary/) for more information
+        submission:
+          type: object
+          description: Submission object
+          properties:
+            id:
+              type: string
+            userId:
+              type: string
+              description: Submission owner
+            formId:
+              type: string
+            created:
+              type: string
+              format: date-time
+            modified:
+              type: string
+              format: date-time
+            deleted:
+              type: string
+              format: date-time
+            metadata:
+              type: object
+            formArchive:
+              type: string
+              description: The form version the revision was saved under
         validationErrors:
           $ref: '#/components/schemas/ValidationErrors'
   securitySchemes:
