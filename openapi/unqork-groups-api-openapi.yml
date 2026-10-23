@@ -255,3 +255,9 @@ components:
           tokenUrl: https://xyzfinancial.unqork.io/api/1.0/oauth2/access_token
           scopes:
             none: N/A
+x-provenance:
+  method: harvested
+  publisher: Unqork
+  source: https://developers.unqork.io/api/1.0/openapi.yml
+  note: split by refine-openapis from the provider's own published document, verified by fetch (openapi/_original/*.fetch.json);
+    stamped by stamp-openapi-provenance.py (roadmap#793)
