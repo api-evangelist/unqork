@@ -5,7 +5,7 @@
       "source": "https://unqork.com/resource-center/feed/",
       "feed_url": "https://unqork.com/resource-center/feed/",
       "title": "",
-      "saved": 1,
+      "saved": 0,
       "method": "feed"
     },
     {
@@ -16,12 +16,13 @@
       "method": "discovered"
     },
     {
-      "source": "https://community.unqork.com/",
-      "feed_url": "",
+      "source": "https://unqork.com/feed/",
+      "feed_url": "https://unqork.com/feed/",
+      "title": "",
       "saved": 0,
-      "skipped": "community-shaped; a vendor feed already saved this run (roadmap#239)"
+      "method": "feed"
     }
   ],
-  "post_count": 1,
-  "fetched": "2026-10-10T13:15:00Z"
+  "post_count": 21,
+  "fetched": "2026-10-17T14:53:57Z"
 }
